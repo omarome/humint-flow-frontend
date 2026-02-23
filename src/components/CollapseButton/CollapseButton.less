@@ -1,0 +1,60 @@
+// Variables
+@primary-color: #007bff;
+@spacing: 12px;
+@transition-duration: 0.3s;
+@transition-easing: ease-in-out;
+
+.collapse-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: @spacing;
+  margin-bottom: @spacing;
+  background-color: transparent;
+  border: 1px solid @primary-color;
+  border-radius: 4px;
+  color: @primary-color;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color @transition-duration @transition-easing,
+              color @transition-duration @transition-easing,
+              border-color @transition-duration @transition-easing,
+              transform 0.1s @transition-easing;
+  font-family: inherit;
+  gap: @spacing / 2;
+
+  &__text {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background-color: @primary-color;
+    color: #ffffff;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus {
+    outline: 2px solid lighten(@primary-color, 20%);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    
+    &:hover {
+      background-color: transparent;
+      color: @primary-color;
+    }
+  }
+}

@@ -1,0 +1,134 @@
+import React, { useState, useMemo, useCallback } from 'react';
+import { QueryBuilder } from 'react-querybuilder';
+import PropTypes from 'prop-types';
+import CollapseButton from '../CollapseButton';
+import AutocompleteValueEditor from '../AutocompleteValueEditor';
+import { countRules } from '../../utils/queryUtils';
+import './QueryBuilderController.less';
+import './QueryBuilderController.query-builder.css';
+
+/**
+ * Query Builder Controller Component
+ * Manages the query builder state and provides a collapsible interface
+ * 
+ * @param {array} fields - Array of field definitions for the query builder
+ * @param {array} operators - Array of operator definitions
+ * @param {object} initialQuery - Initial query state
+ * @param {function} onQueryChange - Callback when query changes
+ * @param {string} label - Label prefix for the button (e.g., "Advanced filters")
+ * @param {object} queryBuilderProps - Additional props to pass to QueryBuilder
+ */
+const QueryBuilderController = ({
+  fields,
+  operators,
+  initialQuery = { combinator: 'and', rules: [] },
+  onQueryChange,
+  label = 'Advanced filters',
+  ...queryBuilderProps
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [query, setQuery] = useState(initialQuery);
+
+  const handleToggle = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
+
+  const handleQueryChange = useCallback(
+    (newQuery) => {
+      setQuery(newQuery);
+      if (onQueryChange) {
+        onQueryChange(newQuery);
+      }
+    },
+    [onQueryChange]
+  );
+
+  const rulesCount = useMemo(() => countRules(query), [query]);
+
+  const expandedLabel = `Hide ${label}`;
+  const collapsedLabel = `${label} [${rulesCount} selected]`;
+
+  // Custom controls to use AutocompleteValueEditor for text inputs
+  const customControls = useMemo(() => ({
+    valueEditor: (props) => {
+      // Use autocomplete editor for text type inputs when values are available
+      const { fieldData, type, values, operator } = props;
+      
+      // Don't use autocomplete for null/notNull operators
+      if (operator === 'null' || operator === 'notNull') {
+        return <props.schema.controls.valueEditor {...props} />;
+      }
+      
+      // Use autocomplete for text inputs when values are available
+      const shouldUseAutocomplete = 
+        (type === 'text' || !type) && 
+        values && 
+        Array.isArray(values) &&
+        values.length > 0;
+      
+      if (shouldUseAutocomplete) {
+        return <AutocompleteValueEditor {...props} />;
+      }
+      
+      // Fall back to default value editor for other types
+      return <props.schema.controls.valueEditor {...props} />;
+    },
+  }), []);
+
+  // Determine value editor type - use 'text' for autocomplete when values are available
+  const getValueEditorType = useCallback((field, operator, { fieldData }) => {
+    // If field has values defined, use text editor (which will be replaced by autocomplete)
+    if (fieldData?.values && fieldData.values.length > 0) {
+      return 'text';
+    }
+    // Use default based on field data or input type
+    return fieldData?.valueEditorType || 'text';
+  }, []);
+
+  return (
+    <div className="query-builder-controller">
+      <CollapseButton
+        isExpanded={isExpanded}
+        onToggle={handleToggle}
+        expandedLabel={expandedLabel}
+        collapsedLabel={collapsedLabel}
+      />
+
+      {isExpanded && (
+        <div className="query-builder-controller__content">
+          <QueryBuilder
+            fields={fields}
+            operators={operators}
+            query={query}
+            onQueryChange={handleQueryChange}
+            showCombinatorsBetweenRules={true}
+            showNotToggle={true}
+            getValueEditorType={getValueEditorType}
+            controlElements={customControls}
+            {...queryBuilderProps}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+QueryBuilderController.propTypes = {
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      label: PropTypes.string,
+    })
+  ).isRequired,
+  operators: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      label: PropTypes.string,
+    })
+  ).isRequired,
+  initialQuery: PropTypes.object,
+  onQueryChange: PropTypes.func,
+  label: PropTypes.string,
+};
+
+export default QueryBuilderController;

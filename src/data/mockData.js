@@ -1,0 +1,86 @@
+/**
+ * Mock data for demonstration purposes
+ * This data will be filtered based on query builder rules
+ */
+export const mockUsers = [
+  {
+    id: 1,
+    firstName: 'John',
+    lastName: 'Doe',
+    age: 28,
+    email: 'john.doe@example.com',
+    status: 'Active',
+  },
+  {
+    id: 2,
+    firstName: 'Jane',
+    lastName: 'Smith',
+    age: 32,
+    email: 'jane.smith@example.com',
+    status: 'Active',
+  },
+  {
+    id: 3,
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    age: 45,
+    email: 'bob.johnson@example.com',
+    status: 'Inactive',
+  },
+  {
+    id: 4,
+    firstName: 'Alice',
+    lastName: 'Williams',
+    age: 29,
+    email: 'alice.williams@example.com',
+    status: 'Active',
+  },
+  {
+    id: 5,
+    firstName: 'Charlie',
+    lastName: 'Brown',
+    age: 35,
+    email: 'charlie.brown@example.com',
+    status: 'Pending',
+  },
+  {
+    id: 6,
+    firstName: 'Diana',
+    lastName: 'Davis',
+    age: 27,
+    email: 'diana.davis@example.com',
+    status: 'Active',
+  },
+  {
+    id: 7,
+    firstName: 'Edward',
+    lastName: 'Miller',
+    age: 41,
+    email: 'edward.miller@example.com',
+    status: 'Inactive',
+  },
+  {
+    id: 8,
+    firstName: 'Fiona',
+    lastName: 'Wilson',
+    age: 33,
+    email: 'fiona.wilson@example.com',
+    status: 'Active',
+  },
+  {
+    id: 9,
+    firstName: 'George',
+    lastName: 'Moore',
+    age: 38,
+    email: 'george.moore@example.com',
+    status: 'Pending',
+  },
+  {
+    id: 10,
+    firstName: 'Helen',
+    lastName: 'Taylor',
+    age: 26,
+    email: 'helen.taylor@example.com',
+    status: 'Active',
+  },
+];

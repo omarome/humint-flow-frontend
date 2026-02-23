@@ -1,0 +1,85 @@
+/* Query Builder Override Styles */
+.query-builder-controller__content .ruleGroup {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 6px 0;
+}
+
+.query-builder-controller__content .rule {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.query-builder-controller__content .ruleGroup-addRule,
+.query-builder-controller__content .ruleGroup-addGroup {
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  margin: 6px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.query-builder-controller__content .ruleGroup-addRule:hover,
+.query-builder-controller__content .ruleGroup-addGroup:hover {
+  background-color: #0056b3;
+}
+
+.query-builder-controller__content .ruleGroup-remove,
+.query-builder-controller__content .rule-remove {
+  background-color: #dc3545;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.query-builder-controller__content .ruleGroup-remove:hover,
+.query-builder-controller__content .rule-remove:hover {
+  background-color: #c82333;
+}
+
+.query-builder-controller__content select,
+.query-builder-controller__content input {
+  padding: 6px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Layout: field + operator fixed, value grows */
+.query-builder-controller__content .rule .rule-field {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+
+.query-builder-controller__content .rule .rule-operator {
+  flex: 0 0 auto;
+  min-width: 110px;
+}
+
+.query-builder-controller__content .rule .rule-value {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.query-builder-controller__content select:focus,
+.query-builder-controller__content input:focus {
+  outline: 2px solid rgba(0, 123, 255, 0.2);
+  outline-offset: 2px;
+  border-color: #007bff;
+}

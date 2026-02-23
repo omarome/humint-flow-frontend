@@ -1,0 +1,222 @@
+@primary-color: #007bff;
+@error-color: #dc3545;
+@success-color: #28a745;
+@border-color: #ced4da;
+@border-radius: 4px;
+@transition-duration: 0.2s;
+@suggestion-hover-bg: #f8f9fa;
+@suggestion-selected-bg: #e9ecef;
+
+.autocomplete-value-editor {
+  position: relative;
+  width: 100%;
+  min-width: 200px;
+
+  &__input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid @border-color;
+    border-radius: @border-radius;
+    background-color: #fff;
+    transition: border-color @transition-duration ease, box-shadow @transition-duration ease;
+
+    &:focus-within {
+      border-color: @primary-color;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    &--valid {
+      border-color: @success-color;
+      
+      &:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+    }
+
+    &--invalid {
+      border-color: @error-color;
+      
+      &:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+      }
+    }
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0; // Allow flex item to shrink below content size
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    background: transparent;
+    width: 100%;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #6c757d;
+      opacity: 1;
+    }
+
+    &:disabled {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__clear-button {
+    position: absolute;
+    right: 28px; // Position before validation icon
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color @transition-duration ease, color @transition-duration ease;
+    flex-shrink: 0;
+    z-index: 1;
+
+    &:hover {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    &:active {
+      background-color: #dee2e6;
+    }
+
+    &:focus {
+      outline: 2px solid @primary-color;
+      outline-offset: 2px;
+    }
+  }
+
+  &__validation-icon {
+    position: absolute;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    pointer-events: none;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  
+  // Adjust input padding when buttons are visible
+  &__input-wrapper--has-clear &__input {
+    padding-right: 56px; // Space for clear button + validation icon
+  }
+  
+  &__input-wrapper--has-validation:not(&__input-wrapper--has-clear) &__input {
+    padding-right: 36px; // Space for validation icon only
+  }
+
+  &__icon {
+    &--valid {
+      color: @success-color;
+    }
+
+    &--invalid {
+      color: @error-color;
+    }
+  }
+
+  &__error-message {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 2px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: @error-color;
+    line-height: 1.4;
+    z-index: 999;
+    background-color: #fff;
+    pointer-events: none;
+  }
+
+  &--has-error &__suggestions {
+    margin-top: 24px; // Space for error message
+  }
+
+  &__suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    margin: 4px 0 0 0;
+    padding: 0;
+    list-style: none;
+    background-color: #fff;
+    border: 1px solid @border-color;
+    border-radius: @border-radius;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    max-height: 280px; // Show more items before scrolling
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &__suggestion {
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    cursor: pointer;
+    transition: background-color @transition-duration ease;
+
+    &:hover,
+    &--selected {
+      background-color: @suggestion-hover-bg;
+    }
+
+    &--selected {
+      background-color: @suggestion-selected-bg;
+      font-weight: 500;
+    }
+
+    &:first-child {
+      border-top-left-radius: @border-radius;
+      border-top-right-radius: @border-radius;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: @border-radius;
+      border-bottom-right-radius: @border-radius;
+    }
+  }
+}
+
+// Scrollbar styling for suggestions
+.autocomplete-value-editor__suggestions::-webkit-scrollbar {
+  width: 8px;
+}
+
+.autocomplete-value-editor__suggestions::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: @border-radius;
+}
+
+.autocomplete-value-editor__suggestions::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: @border-radius;
+
+  &:hover {
+    background: #555;
+  }
+}

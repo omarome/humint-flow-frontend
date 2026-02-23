@@ -1,0 +1,120 @@
+/**
+ * Utility functions for field configuration and validation
+ */
+
+/**
+ * Extracts unique values from data for a given field
+ * 
+ * @param {array} data - Array of data objects
+ * @param {string} fieldName - Name of the field to extract values from
+ * @returns {array} - Array of unique values sorted alphabetically
+ */
+export const extractUniqueValues = (data, fieldName) => {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  const values = data
+    .map(item => item[fieldName])
+    .filter(value => value !== null && value !== undefined && value !== '')
+    .map(value => String(value).trim());
+
+  // Get unique values and sort
+  const uniqueValues = [...new Set(values)].sort((a, b) => 
+    a.localeCompare(b, undefined, { sensitivity: 'base' })
+  );
+
+  return uniqueValues.map(value => ({
+    name: value,
+    label: value,
+    value: value,
+  }));
+};
+
+/**
+ * Creates a validator function for a field
+ * 
+ * @param {string} fieldName - Name of the field
+ * @param {string} fieldType - Type of field (e.g., 'string', 'number', 'email')
+ * @returns {function} - Validator function
+ */
+export const createFieldValidator = (fieldName, fieldType = 'string') => {
+  return (value, context) => {
+    // Safely extract operator from context (context might be undefined)
+    const operator = context?.operator;
+    const fieldData = context?.fieldData;
+
+    // Allow empty values for some operators (like null checks)
+    if (operator === 'null' || operator === 'notNull') {
+      return true;
+    }
+
+    // Check for empty value
+    if (value === null || value === undefined || String(value).trim() === '') {
+      return { valid: false, message: `${fieldName} cannot be empty` };
+    }
+
+    const stringValue = String(value).trim();
+
+    switch (fieldType) {
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(stringValue)) {
+          return { valid: false, message: 'Please enter a valid email address' };
+        }
+        break;
+
+      case 'number':
+        if (isNaN(Number(stringValue))) {
+          return { valid: false, message: 'Please enter a valid number' };
+        }
+        // Additional validation for numeric operators
+        if (operator && ['<', '>', '<=', '>='].includes(operator)) {
+          const numValue = Number(stringValue);
+          if (isNaN(numValue)) {
+            return { valid: false, message: 'Please enter a valid number for comparison' };
+          }
+        }
+        break;
+
+      case 'string':
+        // Basic string validation
+        if (stringValue.length < 1) {
+          return { valid: false, message: 'Value cannot be empty' };
+        }
+        if (stringValue.length > 255) {
+          return { valid: false, message: 'Value is too long (max 255 characters)' };
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return true; // Valid
+  };
+};
+
+/**
+ * Creates field configuration with values and validators
+ * 
+ * @param {array} data - Data array to extract values from
+ * @param {object} fieldConfig - Field configuration object
+ * @returns {object} - Enhanced field configuration
+ */
+export const enhanceFieldWithValues = (data, fieldConfig) => {
+  const { name, label, type = 'string', values: customValues } = fieldConfig;
+
+  // Use custom values if provided, otherwise extract from data
+  const values = customValues || extractUniqueValues(data, name);
+
+  // Create validator based on field type
+  const validator = createFieldValidator(label || name, type);
+
+  return {
+    ...fieldConfig,
+    values,
+    validator,
+    valueEditorType: 'text', // Will be handled by custom editor
+  };
+};
