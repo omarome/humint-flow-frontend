@@ -16,6 +16,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* When rule contains autocomplete with suggestions, increase z-index */
+.query-builder-controller__content .rule:has(.autocomplete-value-editor__suggestions),
+.query-builder-controller__content .rule:has(.autocomplete-value-editor--has-suggestions) {
+  z-index: 100;
 }
 
 .query-builder-controller__content .ruleGroup-addRule,

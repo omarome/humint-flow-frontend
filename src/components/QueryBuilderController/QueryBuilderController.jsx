@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { QueryBuilder } from 'react-querybuilder';
 import PropTypes from 'prop-types';
 import CollapseButton from '../CollapseButton';
@@ -28,6 +28,8 @@ const QueryBuilderController = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState(initialQuery);
+  const openSuggestionsRef = useRef(new Set());
+  const [hasSuggestionsOpen, setHasSuggestionsOpen] = useState(false);
 
   const handleToggle = useCallback(() => {
     setIsExpanded((prev) => !prev);
@@ -48,6 +50,17 @@ const QueryBuilderController = ({
   const expandedLabel = `Hide ${label}`;
   const collapsedLabel = `${label} [${rulesCount} selected]`;
 
+  // Callback to handle suggestion state changes using Set to track editor IDs
+  const handleSuggestionsChange = useCallback((hasSuggestions, editorId) => {
+    if (hasSuggestions) {
+      openSuggestionsRef.current.add(editorId);
+    } else {
+      openSuggestionsRef.current.delete(editorId);
+    }
+    // Update state to trigger re-render
+    setHasSuggestionsOpen(openSuggestionsRef.current.size > 0);
+  }, []);
+
   // Custom controls to use AutocompleteValueEditor for text inputs
   const customControls = useMemo(() => ({
     valueEditor: (props) => {
@@ -67,13 +80,13 @@ const QueryBuilderController = ({
         values.length > 0;
       
       if (shouldUseAutocomplete) {
-        return <AutocompleteValueEditor {...props} />;
+        return <AutocompleteValueEditor {...props} onSuggestionsChange={handleSuggestionsChange} />;
       }
       
       // Fall back to default value editor for other types
       return <props.schema.controls.valueEditor {...props} />;
     },
-  }), []);
+  }), [handleSuggestionsChange]);
 
   // Determine value editor type - use 'text' for autocomplete when values are available
   const getValueEditorType = useCallback((field, operator, { fieldData }) => {
@@ -95,7 +108,9 @@ const QueryBuilderController = ({
       />
 
       {isExpanded && (
-        <div className="query-builder-controller__content">
+        <div 
+          className={`query-builder-controller__content ${hasSuggestionsOpen ? 'query-builder-controller__content--has-suggestions' : ''}`}
+        >
           <QueryBuilder
             fields={fields}
             operators={operators}
