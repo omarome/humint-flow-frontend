@@ -8,9 +8,9 @@ import {
   useKeyboardNavigation,
   useSuggestionsState,
 } from './hooks';
-import InputWrapper from './parts/InputWrapper';
-import SuggestionsList from './parts/SuggestionsList';
-import ValidationMessage from './parts/ValidationMessage';
+import InputWrapper from './subcomponents/InputWrapper';
+import SuggestionsList from './subcomponents/SuggestionsList';
+import ValidationMessage from './subcomponents/ValidationMessage';
 import '../../styles/AutocompleteValueEditor.less';
 
 const AutocompleteValueEditor = ({

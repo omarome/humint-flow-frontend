@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { QueryBuilder } from 'react-querybuilder';
 import PropTypes from 'prop-types';
 import CollapseButton from '../CollapseButton/CollapseButton';
@@ -18,6 +18,7 @@ const QueryBuilderController = ({
   const [query, setQuery] = useState(initialQuery);
   const openSuggestionsRef = useRef(new Set());
   const [hasSuggestionsOpen, setHasSuggestionsOpen] = useState(false);
+  const containerRef = useRef(null);
 
   const handleToggle = useCallback(() => {
     setIsExpanded((prev) => !prev);
@@ -86,8 +87,25 @@ const QueryBuilderController = ({
     return fieldData?.valueEditorType || 'text';
   }, []);
 
+  // Close panel when clicking outside for better UX
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const handleClickOutside = (event) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(event.target)) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+    };
+  }, [isExpanded]);
+
   return (
-    <div className="query-builder-controller">
+    <div className="query-builder-controller" ref={containerRef}>
       <CollapseButton
         isExpanded={isExpanded}
         onToggle={handleToggle}
