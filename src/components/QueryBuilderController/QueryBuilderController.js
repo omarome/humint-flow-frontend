@@ -93,7 +93,19 @@ const QueryBuilderController = ({
 
     const handleClickOutside = (event) => {
       if (!containerRef.current) return;
-      if (!containerRef.current.contains(event.target)) {
+
+      const target = event.target;
+
+      // Don't close when clicking inside autocomplete suggestions portal
+      if (
+        target &&
+        typeof target.closest === 'function' &&
+        target.closest('.autocomplete-value-editor__suggestions')
+      ) {
+        return;
+      }
+
+      if (!containerRef.current.contains(target)) {
         setIsExpanded(false);
       }
     };

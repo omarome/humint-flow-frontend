@@ -5,6 +5,11 @@ const evaluateRule = (rule, item) => {
   const { field, operator, value } = rule;
   
   if (!field || !operator) return true; // Invalid rule, pass through
+
+   // Treat empty values as "no-op" so partially filled rules don't exclude everything
+  if (value === null || value === undefined || String(value).trim() === '') {
+    return true;
+  }
   
   const fieldValue = item[field];
   const ruleValue = value;
