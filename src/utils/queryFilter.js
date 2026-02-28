@@ -82,12 +82,17 @@ const evaluateRuleGroup = (ruleGroup, item) => {
     }
   });
   
+  let matches;
   if (combinator === 'and') {
-    return results.every((result) => result === true);
+    matches = results.every((result) => result === true);
   } else {
     // 'or' combinator
-    return results.some((result) => result === true);
+    matches = results.some((result) => result === true);
   }
+
+  // Handle the "not" toggle — negate the result of this group
+  const isNot = ruleGroup.not || false;
+  return isNot ? !matches : matches;
 };
 
 export const filterData = (data, query) => {
@@ -100,11 +105,6 @@ export const filterData = (data, query) => {
     return data;
   }
   
-  // Filter data based on query
-  return data.filter((item) => {
-    // Handle 'not' combinator
-    const isNot = query.not || false;
-    const matches = evaluateRuleGroup(query, item);
-    return isNot ? !matches : matches;
-  });
+  // evaluateRuleGroup now handles the `not` flag at every level
+  return data.filter((item) => evaluateRuleGroup(query, item));
 };
