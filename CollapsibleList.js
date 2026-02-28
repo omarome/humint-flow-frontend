@@ -3,20 +3,22 @@ import 'react-querybuilder/dist/query-builder.css';
 import QueryBuilderController from './src/components/QueryBuilderController/QueryBuilderController';
 import ResultsTable from './src/components/ResultsTable/ResultsTable';
 import { filterData } from './src/utils/queryFilter';
-import { fetchUsers } from './src/services/userApi';
+import { fetchUsers, fetchVariables } from './src/services/userApi';
 import { enhanceFieldWithValues } from './src/utils/fieldUtils';
-import { baseFields, defaultOperators } from './src/config/queryConfig';
+import { buildFieldsFromVariables, defaultOperators } from './src/config/queryConfig';
 import './src/styles/CollapsibleList.less';
 
 /**
  * CollapsibleList Component
- * Wrapper component that uses QueryBuilderController for advanced filtering
- * and displays filtered results in a table.
  *
- * Data is fetched from the Spring Boot backend on mount.
+ * - Fetches data from /api/users
+ * - Fetches field definitions from /api/variables
+ * - Builds query builder fields from the variables endpoint
+ * - Enhances fields with autocomplete values extracted from the data
  */
 const CollapsibleList = () => {
   const [users, setUsers] = useState([]);
+  const [variables, setVariables] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState({
@@ -24,17 +26,21 @@ const CollapsibleList = () => {
     rules: [],
   });
 
-  // Fetch users from the backend API
+  // Fetch users and variables in parallel from the backend
   useEffect(() => {
     let cancelled = false;
 
-    const loadUsers = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await fetchUsers();
+        const [usersData, variablesData] = await Promise.all([
+          fetchUsers(),
+          fetchVariables(),
+        ]);
         if (!cancelled) {
-          setUsers(data);
+          setUsers(usersData);
+          setVariables(variablesData);
         }
       } catch (err) {
         if (!cancelled) {
@@ -47,18 +53,18 @@ const CollapsibleList = () => {
       }
     };
 
-    loadUsers();
+    loadData();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Enhanced fields with autocomplete values extracted from live data
-  const fields = useMemo(
-    () => baseFields.map((field) => enhanceFieldWithValues(users, field)),
-    [users]
-  );
+  // Build fields from /api/variables, then enhance with autocomplete values from data
+  const fields = useMemo(() => {
+    const baseFields = buildFieldsFromVariables(variables);
+    return baseFields.map((field) => enhanceFieldWithValues(users, field));
+  }, [variables, users]);
 
   const operators = defaultOperators;
 
@@ -71,17 +77,19 @@ const CollapsibleList = () => {
     return filterData(users, query);
   }, [users, query]);
 
-  // Define table columns
-  const tableColumns = [
-    { key: 'id', label: 'ID' },
-    { key: 'firstName', label: 'First Name' },
-    { key: 'lastName', label: 'Last Name' },
-    { key: 'age', label: 'Age' },
-    { key: 'email', label: 'Email' },
-    { key: 'status', label: 'Status' },
-    { key: 'nickname', label: 'Nickname' },
-    { key: 'isOnline', label: 'Is Online' },
-  ];
+  // Derive table columns from variables (uses label from the backend)
+  const tableColumns = useMemo(() => {
+    if (users.length === 0) return [];
+
+    // Build a label lookup from the variables endpoint
+    const labelMap = new Map(variables.map((v) => [v.name, v.label]));
+
+    // Include all keys from the data, using the backend label when available
+    return Object.keys(users[0]).map((key) => ({
+      key,
+      label: labelMap.get(key) || key,
+    }));
+  }, [users, variables]);
 
   if (error) {
     return (
