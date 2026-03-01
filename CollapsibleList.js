@@ -5,7 +5,7 @@ import ResultsTable from './src/components/ResultsTable/ResultsTable';
 import { filterData } from './src/utils/queryFilter';
 import { fetchUsers, fetchVariables } from './src/services/userApi';
 import { enhanceFieldWithValues } from './src/utils/fieldUtils';
-import { buildFieldsFromVariables, defaultOperators } from './src/config/queryConfig';
+import { buildFieldsFromVariables } from './src/config/queryConfig';
 import './src/styles/CollapsibleList.less';
 
 /**
@@ -66,8 +66,6 @@ const CollapsibleList = () => {
     return baseFields.map((field) => enhanceFieldWithValues(users, field));
   }, [variables, users]);
 
-  const operators = defaultOperators;
-
   const handleQueryChange = useCallback((newQuery) => {
     setQuery(newQuery);
   }, []);
@@ -105,7 +103,7 @@ const CollapsibleList = () => {
     <div className="collapsible-list" data-testid="collapsible-list">
       <QueryBuilderController
         fields={fields}
-        operators={operators}
+        query={query}
         label="Advanced filters"
         onQueryChange={handleQueryChange}
       />

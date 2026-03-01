@@ -1,11 +1,5 @@
 import { defaultOperators as rqbDefaultOperators, toFullOption } from 'react-querybuilder';
 
-/**
- * Re-export the library's defaultOperators so consumers don't need to
- * import from react-querybuilder directly.
- */
-export const defaultOperators = rqbDefaultOperators;
-
 // ---------------------------------------------------------------------------
 // Operator names allowed per data type
 // ---------------------------------------------------------------------------
@@ -46,6 +40,7 @@ const booleanOperators = rqbDefaultOperators.filter((op) => booleanTypeOperators
 // ---------------------------------------------------------------------------
 const variableTypeMap = {
   STRING: 'string',
+  EMAIL: 'email',
   BOOL: 'boolean',
   UDINT: 'number',
   UINT: 'number',
@@ -55,15 +50,36 @@ const variableTypeMap = {
   LREAL: 'number',
 };
 
+/** Signed PLC types — negative values are valid for these. */
+const signedTypes = new Set(['INT', 'DINT', 'REAL', 'LREAL']);
+
 const operatorsByType = {
   string: stringOperators,
+  email: stringOperators,
   number: numberOperators,
   boolean: booleanOperators,
 };
 
 // ---------------------------------------------------------------------------
-// Build fields from /api/variables response
+// Per-field UI overrides
+//
+// The backend provides the data type; the frontend decides the best widget.
+// Only fields that need a non-default editor belong here.
 // ---------------------------------------------------------------------------
+const selectOperators = rqbDefaultOperators.filter((op) => ['=', '!=', 'null', 'notNull'].includes(op.name));
+
+const fieldEditorOverrides = {
+  status: {
+    valueEditorType: 'select',
+    values: [
+      { name: 'Active', label: 'Active' },
+      { name: 'Inactive', label: 'Inactive' },
+      { name: 'Pending', label: 'Pending' },
+    ],
+    operators: selectOperators,
+  },
+};
+
 
 /**
  * Builds the full field list for react-querybuilder from the /api/variables
@@ -80,11 +96,15 @@ export const buildFieldsFromVariables = (variables) => {
     const type = variableTypeMap[backendType] || 'string';
     const operators = operatorsByType[type] || stringOperators;
 
+    // Apply any UI-level overrides (e.g. select menus)
+    const overrides = fieldEditorOverrides[name] || {};
+
     const baseField = {
       name,
       label,
       type,
       operators,
+      ...overrides,
     };
 
     // Boolean fields → radio buttons with True / False
@@ -100,9 +120,13 @@ export const buildFieldsFromVariables = (variables) => {
       });
     }
 
-    // Number fields → number input
+    // Number fields → number input; unsigned types reject negatives
     if (type === 'number') {
-      return toFullOption({ ...baseField, inputType: 'number' });
+      return toFullOption({
+        ...baseField,
+        inputType: 'number',
+        allowNegative: signedTypes.has(backendType),
+      });
     }
 
     return toFullOption(baseField);
