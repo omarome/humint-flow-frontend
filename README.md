@@ -54,9 +54,9 @@ A production-ready React application for dynamic data filtering, built on top of
 
 3. Configure the API base URL:
    ```bash
-   export VITE_API_BASE_URL=/api  # For same-domain deployment
+   export=/api  # For same-domain deployment
    # or
-   export VITE_API_BASE_URL=https://your-api-domain.com/api  # For cross-domain
+   export =https://your-api-domain.com/api  # For cross-domain
    ```
 
 ### Environment Variables
