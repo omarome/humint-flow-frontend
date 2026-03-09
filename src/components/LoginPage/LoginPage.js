@@ -12,7 +12,11 @@ import {
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { IconButton, Tooltip } from '@mui/material';
 import { useAuth } from '../../context/AuthProvider';
+import { useThemeControl } from '../../context/ThemeContext';
 import '../../styles/LoginPage.less';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -22,6 +26,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
  */
 export default function LoginPage({ onSwitchToRegister }) {
   const { login } = useAuth();
+  const { mode, toggleTheme } = useThemeControl();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -46,7 +51,13 @@ export default function LoginPage({ onSwitchToRegister }) {
 
   return (
     <Box className="login-page">
-      <Paper className="login-card" elevation={8}>
+      <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
+        <IconButton onClick={toggleTheme} className="login-theme-toggle">
+          {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+        </IconButton>
+      </Tooltip>
+
+      <Paper className="login-card" elevation={0}>
         <Box className="login-icon-wrapper">
           <LockOutlinedIcon className="login-icon" />
         </Box>

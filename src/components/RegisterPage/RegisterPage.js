@@ -9,8 +9,13 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { IconButton, Tooltip } from '@mui/material';
 import { useAuth } from '../../context/AuthProvider';
+import { useThemeControl } from '../../context/ThemeContext';
 import '../../styles/RegisterPage.less';
 
 /**
@@ -18,6 +23,7 @@ import '../../styles/RegisterPage.less';
  */
 export default function RegisterPage({ onSwitchToLogin }) {
   const { register } = useAuth();
+  const { mode, toggleTheme } = useThemeControl();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +56,13 @@ export default function RegisterPage({ onSwitchToLogin }) {
 
   return (
     <Box className="register-page">
-      <Paper className="register-card" elevation={8}>
+      <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
+        <IconButton onClick={toggleTheme} className="register-theme-toggle">
+          {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+        </IconButton>
+      </Tooltip>
+
+      <Paper className="register-card" elevation={0}>
         <Box className="register-icon-wrapper">
           <PersonAddOutlinedIcon className="register-icon" />
         </Box>

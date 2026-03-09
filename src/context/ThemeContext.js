@@ -44,8 +44,8 @@ export const ThemeControlProvider = ({ children }) => {
         main: '#764ba2',
       },
       background: {
-        default: mode === 'light' ? '#f5f5f5' : '#0f0c29',
-        paper: mode === 'light' ? '#ffffff' : '#1a1a2e',
+        default: mode === 'light' ? '#f5f7fa' : '#0f0c29',
+        paper: mode === 'light' ? '#ffffff' : 'rgba(255, 255, 255, 0.05)',
       },
     },
     typography: {
