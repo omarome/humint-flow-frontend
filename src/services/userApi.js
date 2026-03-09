@@ -1,28 +1,20 @@
 /**
  * API client for the Smart Filter Hub backend.
  *
- * The base URL is configured via the VITE_API_BASE_URL environment variable:
- *   - Development: http://localhost:8080/api  (direct to Spring Boot)
- *   - Production:  /api                       (NGINX reverse proxy or proxy rule)
- *
- * Optional HTTP Basic credentials can be provided via two additional
- * environment variables. In Netlify you would define:
- *
- *   VITE_API_USERNAME = yourUsername
- *   VITE_API_PASSWORD = yourPassword
- *
- * The helper below will automatically add an Authorization header when both
- * values are present.
+ * All requests carry a JWT Bearer token obtained from AuthProvider.
+ * The base URL is configured via the VITE_API_BASE_URL environment variable.
  */
+import { getAccessToken } from '../context/AuthProvider';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
-// build auth header if username/password are supplied
+/**
+ * Build Authorization header with the current JWT.
+ */
 function getAuthHeader() {
-  const user = import.meta.env.VITE_API_USERNAME;
-  const pass = import.meta.env.VITE_API_PASSWORD;
-  if (user && pass) {
-    const token = btoa(`${user}:${pass}`);
-    return { Authorization: `Basic ${token}` };
+  const token = getAccessToken();
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
   }
   return {};
 }
@@ -35,6 +27,9 @@ export const fetchUsers = async () => {
     headers: getAuthHeader()
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Authentication required');
+    }
     throw new Error(`Failed to fetch users: ${response.status}`);
   }
   return response.json();
@@ -49,6 +44,9 @@ export const fetchVariables = async () => {
     headers: getAuthHeader()
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Authentication required');
+    }
     throw new Error(`Failed to fetch variables: ${response.status}`);
   }
   return response.json();

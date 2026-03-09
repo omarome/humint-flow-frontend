@@ -9,13 +9,14 @@
 body {
   font-family: @font-family;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-smoothing: grayscale;
   background-color: @background-page;
-  padding: 20px;
+  color: @text-color;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   max-width: 1200px;
   margin: 0 auto;
 }
-

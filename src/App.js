@@ -1,23 +1,124 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Box, IconButton, Typography, Menu, MenuItem, CircularProgress, Divider, Tooltip } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+
 import CollapsibleList from './components/CollapsibleList/CollapsibleList';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import LoginPage from './components/LoginPage/LoginPage';
+import RegisterPage from './components/RegisterPage/RegisterPage';
+import ProfileView from './components/ProfileView/ProfileView';
+import { AuthProvider, useAuth } from './context/AuthProvider';
+import { ThemeControlProvider, useThemeControl } from './context/ThemeContext';
 import './styles/App.less';
 
 /**
- * App
- *
- * Top-level shell that renders the advanced data explorer
- * with dynamic filtering powered by React Query Builder.
+ * Inner app shell — rendered only when authenticated.
  */
+function AppContent() {
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { mode, toggleTheme } = useThemeControl();
+  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
+  const [appView, setAppView] = useState('hub'); // 'hub' | 'profile'
+  const [anchorEl, setAnchorEl] = useState(null);
 
-function App() {
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+        }}
+      >
+        <CircularProgress sx={{ color: '#667eea' }} size={48} />
+      </Box>
+    );
+  }
+
+  // ── Not authenticated → show login or register ──────────
+  if (!isAuthenticated) {
+    if (authView === 'register') {
+      return <RegisterPage onSwitchToLogin={() => setAuthView('login')} />;
+    }
+    return <LoginPage onSwitchToRegister={() => setAuthView('register')} />;
+  }
+
+  // ── Authenticated → show main app or profile ────────────
   return (
     <div className="app">
-      <h1>{import.meta.env.VITE_APP_TITLE || 'Smart Filter Hub'}</h1>
+      <Box className="app-header">
+        <Typography 
+          variant="h1" 
+          onClick={() => setAppView('hub')}
+          sx={{ cursor: 'pointer', fontSize: '2rem', m: 0, fontWeight: 700 }}
+        >
+          {import.meta.env.VITE_APP_TITLE || 'Smart Filter Hub'}
+        </Typography>
+
+        <Box className="app-user-menu">
+          <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
+            <IconButton onClick={toggleTheme} sx={{ color: '#fff', mr: 1 }}>
+              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+            </IconButton>
+          </Tooltip>
+
+          <IconButton
+            id="user-menu-button"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            sx={{ color: '#fff' }}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+          >
+            <MenuItem 
+              id="profile-button"
+              onClick={() => { setAnchorEl(null); setAppView('profile'); }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {user?.displayName || user?.email} (Profile)
+              </Typography>
+            </MenuItem>
+            <Divider />
+            <MenuItem
+              id="logout-button"
+              onClick={() => { setAnchorEl(null); logout(); }}
+            >
+              <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Sign Out
+            </MenuItem>
+          </Menu>
+        </Box>
+      </Box>
+
       <ErrorBoundary>
-        <CollapsibleList />
+        {appView === 'profile' ? (
+          <ProfileView onBack={() => setAppView('hub')} />
+        ) : (
+          <CollapsibleList />
+        )}
       </ErrorBoundary>
     </div>
+  );
+}
+
+/**
+ * App — top-level component wrapped in AuthProvider.
+ */
+function App() {
+  return (
+    <ThemeControlProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeControlProvider>
   );
 }
 

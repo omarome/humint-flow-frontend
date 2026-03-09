@@ -1,9 +1,9 @@
 // Design tokens – shared across all styles
 
 // Colors
-@primary-color: #007bff;
-@primary-hover: #0056b3;
-@primary-focus-rgba: rgba(0, 123, 255, 0.25);
+@primary-color: #667eea;
+@primary-hover: #5d71d6;
+@primary-focus-rgba: rgba(102, 126, 234, 0.25);
 
 @error-color: #dc3545;
 @error-hover: #c82333;
@@ -24,6 +24,30 @@
 @text-color: #212529;
 @text-muted: #495057;
 @text-placeholder: #6c757d;
+
+// Dark mode overrides
+.dark-mode {
+  @primary-color: #7d91f1;
+  @primary-hover: #8ba0f5;
+  
+  @border-color: #3a3a4e;
+  @border-color-light: #2e2e42;
+
+  @background: #1a1a2e;
+  @background-page: #0f0c29;
+  @background-muted: #16162a;
+  @background-disabled: #252538;
+  @background-active: #2a2a44;
+
+  @text-color: #e0e0e0;
+  @text-muted: #a0a0b0;
+  @text-placeholder: #707080;
+  
+  @scrollbar-track: #16162a;
+  @scrollbar-thumb: #3a3a4e;
+  @scrollbar-thumb-hover: #4a4a60;
+}
+
 @text-muted-light: lighten(@text-color, 30%);
 
 @scrollbar-track: #f1f1f1;

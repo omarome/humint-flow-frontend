@@ -1,0 +1,119 @@
+/* ── RegisterPage Styles ──────────────────────────────────── */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  padding: 1rem;
+}
+
+.register-card {
+  max-width: 440px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff !important;
+}
+
+.register-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.register-icon {
+  color: #fff;
+  font-size: 28px !important;
+}
+
+.register-title {
+  color: #fff !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+  letter-spacing: -0.5px;
+}
+
+.register-subtitle {
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.register-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.register-field {
+  .MuiOutlinedInput-root {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+
+    fieldset {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    &:hover fieldset {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    &.Mui-focused fieldset {
+      border-color: #11998e;
+    }
+  }
+  .MuiInputLabel-root {
+    color: rgba(255, 255, 255, 0.5);
+    &.Mui-focused {
+      color: #11998e;
+    }
+  }
+  .MuiFormHelperText-root {
+    color: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.register-button {
+  margin-top: 0.5rem !important;
+  padding: 0.75rem !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+  box-shadow: 0 4px 20px rgba(17, 153, 142, 0.35) !important;
+  transition: box-shadow 0.3s ease, transform 0.15s ease !important;
+
+  &:hover {
+    box-shadow: 0 6px 28px rgba(17, 153, 142, 0.5) !important;
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.register-footer {
+  margin-top: 1.5rem !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+
+  .MuiLink-root {
+    color: #38ef7d !important;
+    font-weight: 600;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

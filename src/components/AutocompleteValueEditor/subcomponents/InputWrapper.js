@@ -78,7 +78,7 @@ const InputWrapper = ({
 
 InputWrapper.propTypes = {
   inputValue: PropTypes.string.isRequired,
-  inputRef: PropTypes.object.isRequired,
+  inputRef: PropTypes.oneOfType([PropTypes.object, PropTypes.func]).isRequired,
   inputType: PropTypes.string,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
