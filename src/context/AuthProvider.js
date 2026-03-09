@@ -111,6 +111,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, [clearTokens]);
 
+  const handleOAuthSuccess = useCallback(async (accessToken, refreshToken) => {
+    // We assume default expiry for now, it'll be refreshed anyway
+    saveTokens(accessToken, refreshToken, 900);
+    try {
+      const userData = await getMeApi(accessToken);
+      setUser(userData);
+    } catch {
+      clearTokens();
+    }
+  }, [saveTokens, clearTokens]);
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -118,6 +129,8 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    handleOAuthSuccess,
+    setUser // Useful for manual updates
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

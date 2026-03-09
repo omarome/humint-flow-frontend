@@ -18,11 +18,24 @@ import './styles/App.less';
  * Inner app shell — rendered only when authenticated.
  */
 function AppContent() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, handleOAuthSuccess } = useAuth();
   const { mode, toggleTheme } = useThemeControl();
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
   const [appView, setAppView] = useState('hub'); // 'hub' | 'profile'
   const [anchorEl, setAnchorEl] = useState(null);
+
+  // ── Handle OAuth Success Redirect ──────────────────────
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get('accessToken');
+    const refreshToken = params.get('refreshToken');
+
+    if (accessToken && refreshToken && window.location.pathname.includes('/login-success')) {
+      handleOAuthSuccess(accessToken, refreshToken);
+      // Clean up URL to keep it pretty
+      window.history.replaceState({}, document.title, "/");
+    }
+  }, [handleOAuthSuccess]);
 
   if (isLoading) {
     return (
