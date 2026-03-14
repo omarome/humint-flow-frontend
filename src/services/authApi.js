@@ -88,7 +88,12 @@ export const updateProfileApi = async (accessToken, displayName) => {
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.error || `Update failed: ${response.status}`);
+    let errorMessage = data.error;
+    if (!errorMessage && typeof data === 'object') {
+      // Collect all values from a map of field errors (e.g. { displayName: "too long" })
+      errorMessage = Object.values(data).join(', ');
+    }
+    throw new Error(errorMessage || `Update failed: ${response.status}`);
   }
   return response.json();
 };
