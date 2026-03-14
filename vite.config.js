@@ -1,32 +1,20 @@
-import { defineConfig, transformWithEsbuild } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Allow JSX syntax in .js files across the app
-function jsxInJs() {
-  return {
-    name: 'jsx-in-js',
-    enforce: 'pre',
-    async transform(code, id) {
-      if (!id.endsWith('.js') || id.includes('node_modules')) return null;
-      return transformWithEsbuild(code, id, {
-        loader: 'jsx',
-        jsx: 'automatic',
-      });
-    },
-  };
-}
 
 export default defineConfig({
-  plugins: [jsxInJs(), react()],
-  // Ensure any esbuild usage (dev optimizeDeps, etc.) treats .js as JSX
+  plugins: [react()],
+  // Handle JSX in .js files
   esbuild: {
-    loader: { '.js': 'jsx' },
-    jsx: 'automatic',
+    loader: 'jsx',
+    include: /src\/.*\.js$/,
+    exclude: [],
   },
   optimizeDeps: {
     esbuildOptions: {
-      loader: { '.js': 'jsx' },
-      jsx: 'automatic',
+      loader: {
+        '.js': 'jsx',
+      },
     },
   },
   build: {
@@ -40,6 +28,7 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173, // Fix the port to avoid redirect issues
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

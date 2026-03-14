@@ -24,22 +24,30 @@ const ResultsTable = ({ data, columns, isLoading = false, testIdPrefix = 'result
   }
 
   return (
-    <div className="results-table" data-testid={testIdPrefix}>
-      <div className="results-table__header">
+    <div className="results-table insight-table" data-testid={testIdPrefix}>
+      <div className="results-table__header section-header">
         <h3
-          className="results-table__title"
+          className="results-table__title section-title"
           data-testid={`${testIdPrefix}-title`}
         >
           Results ({data.length} {data.length === 1 ? 'item' : 'items'})
         </h3>
+        <div className="bulk-actions">
+          <span className="bulk-label">Bulk Actions:</span>
+          <button className="bulk-btn">Email</button>
+          <button className="bulk-btn">Delete</button>
+        </div>
       </div>
-      <div className="results-table__container">
+      <div className="results-table__container custom-scrollbar">
         <table
           className="results-table__table"
           data-testid={`${testIdPrefix}-table`}
         >
           <thead className="results-table__thead">
             <tr>
+              <th className="results-table__th checkbox-cell">
+                <input type="checkbox" />
+              </th>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -49,6 +57,7 @@ const ResultsTable = ({ data, columns, isLoading = false, testIdPrefix = 'result
                   {column.label || column.key}
                 </th>
               ))}
+              <th className="results-table__th text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="results-table__tbody">
@@ -60,11 +69,37 @@ const ResultsTable = ({ data, columns, isLoading = false, testIdPrefix = 'result
                   className="results-table__tr"
                   data-testid={`${testIdPrefix}-row-${rowId}`}
                 >
+                  <td className="results-table__td checkbox-cell">
+                    <input type="checkbox" />
+                  </td>
                   {columns.map((column) => {
                     const cellValue = row[column.key];
-                    const displayValue = typeof cellValue === 'boolean'
+                    let displayValue = typeof cellValue === 'boolean'
                       ? (cellValue ? 'Yes' : 'No')
                       : cellValue;
+
+                    // Specialized rendering for InsightHub look
+                    if (column.key === 'displayName' || column.key === 'name' || column.key === 'User Details') {
+                       displayValue = (
+                         <div className="user-cell">
+                           <img 
+                             className="user-avatar" 
+                             src={`https://ui-avatars.com/api/?name=${cellValue}&background=random`} 
+                             alt="Avatar" 
+                           />
+                           <div className="user-details">
+                             <div className="user-name">{cellValue}</div>
+                             <div className="user-subtext">{row.email || 'user@example.com'}</div>
+                           </div>
+                         </div>
+                       );
+                    }
+
+                    if (column.key === 'status') {
+                      const statusClass = cellValue?.toLowerCase() === 'active' ? 'status-active' : 
+                                         cellValue?.toLowerCase() === 'pending' ? 'status-pending' : 'status-inactive';
+                      displayValue = <span className={`status-badge ${statusClass}`}>{cellValue}</span>;
+                    }
 
                     return (
                       <td
@@ -76,11 +111,21 @@ const ResultsTable = ({ data, columns, isLoading = false, testIdPrefix = 'result
                       </td>
                     );
                   })}
+                  <td className="results-table__td text-right">
+                    <button className="action-dots">•••</button>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+      </div>
+      <div className="table-footer">
+        <span className="page-info">Page 1 of 4</span>
+        <div className="pagination-btns">
+          <button className="pagination-btn disabled">Previous</button>
+          <button className="pagination-btn">Next</button>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Settings2, ChevronUp, ChevronDown } from 'lucide-react';
 import '../../styles/CollapseButton.less';
+
 const CollapseButton = ({
   isExpanded,
   onToggle,
@@ -15,17 +15,18 @@ const CollapseButton = ({
 
   return (
     <button
-      className={`collapse-button ${isExpanded ? 'collapse-button--expanded' : ''} ${className}`.trim()}
+      className={`collapse-button premium-btn ${isExpanded ? 'collapse-button--expanded' : ''} ${className}`.trim()}
       onClick={onToggle}
       aria-expanded={isExpanded}
       type="button"
       {...buttonProps}
     >
+      <Settings2 size={16} className="collapse-button__icon-left" />
       <span className="collapse-button__text">{buttonText}</span>
       {isExpanded ? (
-        <ExpandLessIcon className="collapse-button__icon" aria-hidden="true" />
+        <ChevronUp size={16} className="collapse-button__icon" aria-hidden="true" />
       ) : (
-        <ExpandMoreIcon className="collapse-button__icon" aria-hidden="true" />
+        <ChevronDown size={16} className="collapse-button__icon" aria-hidden="true" />
       )}
     </button>
   );

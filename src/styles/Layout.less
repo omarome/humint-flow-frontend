@@ -1,0 +1,236 @@
+@import './variables.less';
+
+.insight-layout {
+  min-height: 100vh;
+  background-color: var(--background-page);
+  color: var(--text-color);
+  font-family: @font-family;
+  transition: all @transition-duration @transition-easing;
+
+  &.dark-mode {
+    background-color: #0f172a; // Deep slate for dark mode
+  }
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--glass-bg-dark);
+  backdrop-filter: var(--glass-blur);
+  height: 64px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  .header-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+
+  .logo-box {
+    background: var(--primary-gradient);
+    padding: 6px;
+    border-radius: var(--border-radius-custom);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .site-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: var(--text-color);
+    margin: 0;
+    letter-spacing: -0.025em;
+  }
+
+  .search-bar {
+    position: relative;
+    width: 384px;
+    display: none; // Hidden on mobile
+
+    @media (min-width: 768px) {
+      display: block;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-placeholder);
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 12px 8px 40px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius-custom);
+      background-color: var(--background-muted);
+      font-size: 14px;
+      transition: all 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--background);
+        box-shadow: 0 0 0 2px var(--primary-focus-rgba);
+      }
+    }
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .header-action {
+    color: var(--text-muted);
+    padding: 8px;
+
+    &:hover {
+      background-color: var(--background-active);
+    }
+  }
+
+  .header-divider {
+    height: 32px;
+    width: 1px;
+    background-color: var(--border-color);
+    margin: 0 8px;
+  }
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .user-info {
+    text-align: right;
+    display: none;
+
+    @media (min-width: 640px) {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .user-role {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1;
+    }
+  }
+
+  .profile-img {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+  }
+}
+
+.main-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.content-layout-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .sidebar {
+    display: none; // Hidden by default
+    flex-shrink: 0;
+    flex-direction: column;
+    gap: 24px;
+
+    &.is-open {
+      display: flex;
+
+      @media (max-width: 1023px) {
+        position: fixed;
+        left: 0;
+        top: 64px;
+        bottom: 0;
+        width: 280px;
+        z-index: 100;
+        background: var(--background-page);
+        padding: 16px;
+        border-right: 1px solid var(--border-color);
+        box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
+        animation: slideInLeft 0.3s ease-out;
+        overflow-y: auto;
+      }
+
+      @media (min-width: 1024px) {
+        width: 320px;
+        position: sticky;
+        top: 88px; // 64px header + 24px padding
+      }
+    }
+  }
+
+  .page-content-area {
+    flex: 1;
+    min-width: 0; // Prevent flex item from overflowing its container
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}

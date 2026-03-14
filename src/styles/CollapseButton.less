@@ -1,58 +1,47 @@
 @import './variables.less';
 
 .collapse-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: @spacing;
-  margin-bottom: @spacing;
-  background-color: transparent;
-  border: 1px solid @primary-color;
-  border-radius: @border-radius;
-  color: @primary-color;
-  font-size: @font-size-base;
-  font-weight: 500;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--border-radius-custom);
+  font-family: @font-family;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color @transition-duration @transition-easing,
-    color @transition-duration @transition-easing,
-    border-color @transition-duration @transition-easing,
-    transform 0.1s @transition-easing;
-  font-family: inherit;
-  gap: @spacing / 2;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-  &__text {
-    flex: 1;
-    text-align: left;
+  &.premium-btn {
+    background: var(--primary-gradient);
+    color: white;
+
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
+  &__icon-left,
   &__icon {
     flex-shrink: 0;
   }
 
-  &:hover {
-    background-color: @primary-color;
-    color: @background;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  &:focus {
-    outline: 2px solid @primary-focus-rgba;
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &--expanded {
+    background: var(--primary-color) !important;
+    color: var(--secondary-color) !important;
+    border: 1px solid var(--secondary-color) !important;
+    box-shadow: none !important;
 
     &:hover {
-      background-color: transparent;
-      color: @primary-color;
+      background-color: var(--secondary-50) !important;
     }
   }
 }
-

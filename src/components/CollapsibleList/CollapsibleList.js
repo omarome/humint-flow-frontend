@@ -2,7 +2,6 @@ import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import 'react-querybuilder/dist/query-builder.css';
 import QueryBuilderController from '../QueryBuilderController/QueryBuilderController';
 import ResultsTable from '../ResultsTable/ResultsTable';
-import DataSourceBanner from '../DataSourceBanner/DataSourceBanner';
 import { filterData } from '../../utils/queryFilter';
 import { fetchUsers, fetchVariables } from '../../services/userApi';
 import { enhanceFieldWithValues } from '../../utils/fieldUtils';
@@ -97,27 +96,39 @@ const CollapsibleList = () => {
     }));
   }, [users, variables]);
 
+
   return (
-    <div className="collapsible-list" data-testid="collapsible-list">
-      {isLive !== null && (
-        <DataSourceBanner
-          isLive={isLive}
-          duration={Number(import.meta.env.VITE_BANNER_DURATION) || 3000}
+    <div className="collapsible-list insight-hub-wrapper" data-testid="collapsible-list">
+      
+      {/* 
+          We move the QueryBuilderController inside the children flow 
+          but styled for the main content area.
+      */}
+      <div className="main-actions-row animate-slide-up delay-300">
+        <QueryBuilderController
+          fields={fields}
+          query={query}
+          label="Advanced filters"
+          onQueryChange={handleQueryChange}
         />
-      )}
-      <QueryBuilderController
-        fields={fields}
-        query={query}
-        label="Advanced filters"
-        onQueryChange={handleQueryChange}
-      />
-      <ResultsTable
-        data={filteredData}
-        columns={tableColumns}
-        isLoading={isLoading}
-      />
+        <div className="secondary-actions">
+           <button className="action-btn border-btn"><LucideSave size={16} /> Save View</button>
+           <button className="action-btn border-btn"><LucideDownload size={16} /> Export</button>
+        </div>
+      </div>
+
+      <div className="results-container animate-fade delay-400">
+        <ResultsTable
+          data={filteredData}
+          columns={tableColumns}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 };
+
+// Internal imports for the icons used in the new structure
+import { LucideSave, LucideDownload } from 'lucide-react';
 
 export default CollapsibleList;

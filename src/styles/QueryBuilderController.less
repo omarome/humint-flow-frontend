@@ -11,17 +11,17 @@
     left: 0;
     right: 0;
     padding: @spacing * 2;
-    background-color: @background;
+    background-color: var(--dropdown-bg);
     border: 1px solid @border-color-light;
     border-radius: @border-radius;
     z-index: @z-index-content;
     max-height: 75vh;
     overflow-y: auto;
-    box-shadow: @shadow-md;
+    box-shadow: var(--dropdown-shadow);
     animation: slideDown @transition-duration @transition-easing;
   }
 
-  &--has-suggestions {
+  &__content--has-suggestions {
     max-height: 92vh;
     overflow: visible;
   }

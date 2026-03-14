@@ -30,7 +30,7 @@
 .query-builder-controller__content .ruleGroup-addRule,
 .query-builder-controller__content .ruleGroup-addGroup {
   background-color: @primary-color;
-  color: @background;
+  color: #ffffff;
   border: none;
   border-radius: @border-radius;
   padding: @spacing-xs @spacing;
@@ -48,7 +48,7 @@
 .query-builder-controller__content .ruleGroup-remove,
 .query-builder-controller__content .rule-remove {
   background-color: @error-color;
-  color: @background;
+  color: #ffffff;
   border: none;
   border-radius: @border-radius;
   padding: @spacing-xs @spacing;
@@ -71,6 +71,11 @@
   background-color: @background-muted; // Theme-aware background
   color: inherit; // Use parent text color
   transition: all 0.2s ease;
+}
+
+.query-builder-controller__content select option {
+  background-color: var(--dropdown-bg);
+  color: var(--text-color);
 }
 
 .query-builder-controller__content .ruleGroup {
@@ -112,4 +117,3 @@
   outline-offset: 2px;
   border-color: @primary-color;
 }
-

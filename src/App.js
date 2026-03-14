@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import { Box, IconButton, Typography, Menu, MenuItem, CircularProgress, Divider, Tooltip } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+// App.js
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Box, CircularProgress } from '@mui/material';
+import { LucideUsers, LucideActivity, LucidePieChart, LucideRadio } from 'lucide-react';
 
 import CollapsibleList from './components/CollapsibleList/CollapsibleList';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import LoginPage from './components/LoginPage/LoginPage';
 import RegisterPage from './components/RegisterPage/RegisterPage';
 import ProfileView from './components/ProfileView/ProfileView';
+import Layout from './components/Layout/Layout';
+import AnalyticsCard from './components/Layout/AnalyticsCard';
+import QuickFilterBuilder from './components/Sidebar/QuickFilterBuilder';
+import DataSourceBanner from './components/DataSourceBanner/DataSourceBanner';
+import { fetchUsers, fetchVariables } from './services/userApi';
+import { mockUsers } from './data/mockData';
+import { mockVariables } from './data/mockVariables';
 import { AuthProvider, useAuth } from './context/AuthProvider';
 import { ThemeControlProvider, useThemeControl } from './context/ThemeContext';
 import './styles/App.less';
@@ -18,14 +23,13 @@ import './styles/App.less';
  * Inner app shell — rendered only when authenticated.
  */
 function AppContent() {
-  const { user, isAuthenticated, isLoading, logout, handleOAuthSuccess } = useAuth();
-  const { mode, toggleTheme } = useThemeControl();
+  const { user, isAuthenticated, isLoading, handleOAuthSuccess } = useAuth();
+  const { mode } = useThemeControl();
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
   const [appView, setAppView] = useState('hub'); // 'hub' | 'profile'
-  const [anchorEl, setAnchorEl] = useState(null);
 
   // ── Handle OAuth Success Redirect ──────────────────────
-  React.useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const accessToken = params.get('accessToken');
     const refreshToken = params.get('refreshToken');
@@ -36,6 +40,34 @@ function AppContent() {
       window.history.replaceState({}, document.title, "/");
     }
   }, [handleOAuthSuccess]);
+
+  // ── Handle Global Data Connection State ─────────────────
+  const [isLive, setIsLive] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [variables, setVariables] = useState([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const dataFetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || dataFetchedRef.current) return;
+    dataFetchedRef.current = true;
+    
+    setIsDataLoading(true);
+    Promise.all([fetchUsers(), fetchVariables()])
+      .then(([usersData, variablesData]) => {
+        setUsers(usersData);
+        setVariables(variablesData);
+        setIsLive(true);
+      })
+      .catch(() => {
+        setUsers(mockUsers);
+        setVariables(mockVariables);
+        setIsLive(false);
+      })
+      .finally(() => {
+        setIsDataLoading(false);
+      });
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -50,7 +82,7 @@ function AppContent() {
             : 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
         }}
       >
-        <CircularProgress sx={{ color: '#667eea' }} size={48} />
+        <CircularProgress sx={{ color: '#7c69ef' }} size={48} />
       </Box>
     );
   }
@@ -63,76 +95,94 @@ function AppContent() {
     return <LoginPage onSwitchToRegister={() => setAuthView('register')} />;
   }
 
-  // ── Authenticated → show main app or profile ────────────
+  // ── Authenticated → Compute Analytics ────────────────────
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.status === 'Active').length;
+  const activePercentage = totalUsers ? Math.round((activeUsers / totalUsers) * 100) : 0;
+  
+  // Calculate age distribution brackets
+  const ageDistribution = [
+    { name: '18-24', count: users.filter(u => u.age >= 18 && u.age <= 24).length },
+    { name: '25-34', count: users.filter(u => u.age >= 25 && u.age <= 34).length },
+    { name: '35-44', count: users.filter(u => u.age >= 35 && u.age <= 44).length },
+    { name: '45-54', count: users.filter(u => u.age >= 45 && u.age <= 54).length },
+    { name: '55+', count: users.filter(u => u.age >= 55).length }
+  ];
+
+  // Calculate status distribution
+  const statusDistribution = [
+    { name: 'Act', count: users.filter(u => u.status === 'Active').length },
+    { name: 'Ina', count: users.filter(u => u.status === 'Inactive').length },
+    { name: 'Pen', count: users.filter(u => u.status === 'Pending').length },
+    { name: 'Arch', count: users.filter(u => u.status === 'Archived').length }
+  ];
+
+  // Calculate online avatars
+  const onlineUsers = users.filter(u => u.isOnline === true);
+  const onlineAvatars = onlineUsers.map(u => 
+    u.avatar || `https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=7c69ef&color=fff`
+  );
+
+  const analytics = (
+    <>
+      <AnalyticsCard title="Total Users" value={totalUsers.toLocaleString()} icon={LucideUsers} trend trendValue="12%" />
+      <AnalyticsCard 
+        title="Users by Status" 
+        value="" 
+        icon={LucideActivity} 
+        color="primary" 
+        chartData={statusDistribution} 
+        chartType="bar" 
+        dataKey="count"
+      />
+      <AnalyticsCard 
+        title="Age Range" 
+        value="" 
+        icon={LucidePieChart} 
+        color="warning" 
+        chartData={ageDistribution} 
+        chartType="pie" 
+        dataKey="count"
+      />
+      <AnalyticsCard 
+        title="Currently Online" 
+        value={onlineUsers.length} 
+        icon={LucideRadio} 
+        color="success" 
+        avatars={onlineAvatars}
+      />
+    </>
+  );
+
+  const banner = isLive !== null ? (
+    <DataSourceBanner
+      isLive={isLive}
+      duration={Number(import.meta.env.VITE_BANNER_DURATION) || 3000}
+    />
+  ) : null;
+
   return (
-    <div className="app">
-      <Box className="app-header">
-        <Typography 
-          variant="h1" 
-          onClick={() => setAppView('hub')}
-          sx={{ 
-            cursor: 'pointer', 
-            fontSize: '2rem', 
-            m: 0, 
-            fontWeight: 700,
-            color: mode === 'dark' ? '#fff' : '#000' // Explicit override
-          }}
-        >
-          {import.meta.env.VITE_APP_TITLE || 'Smart Filter Hub'}
-        </Typography>
-
-        <Box className="app-user-menu">
-          <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
-            <IconButton onClick={toggleTheme} sx={{ color: mode === 'light' ? '#333' : '#fff', mr: 1 }}>
-              {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
-            </IconButton>
-          </Tooltip>
-
-          <IconButton
-            id="user-menu-button"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            sx={{ color: mode === 'light' ? '#333' : '#fff' }}
-          >
-            <AccountCircleIcon />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-          >
-            <MenuItem 
-              id="profile-button"
-              onClick={() => { setAnchorEl(null); setAppView('profile'); }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {user?.displayName || user?.email} (Profile)
-              </Typography>
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              id="logout-button"
-              onClick={() => { setAnchorEl(null); logout(); }}
-            >
-              <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Sign Out
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
-
+    <Layout 
+      analyticsContent={analytics} 
+      sidebarContent={<QuickFilterBuilder />}
+      bannerContent={banner}
+    >
       <ErrorBoundary>
         {appView === 'profile' ? (
           <ProfileView onBack={() => setAppView('hub')} />
         ) : (
-          <CollapsibleList />
+          <CollapsibleList 
+            users={users} 
+            variables={variables} 
+            isDataLoading={isDataLoading} 
+          />
         )}
       </ErrorBoundary>
-    </div>
+    </Layout>
   );
 }
 
-/**
- * App — top-level component wrapped in AuthProvider.
- */
+// App — top-level component wrapped in AuthProvider.
 function App() {
   return (
     <ThemeControlProvider>
