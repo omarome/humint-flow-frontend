@@ -7,15 +7,28 @@ import {
   LucideClock, 
   LucideTrendingDown, 
   LucideUserMinus,
-  LucideArrowRight 
+  LucideArrowRight,
+  LucideTrash2
 } from 'lucide-react';
 import '../../styles/QuickFilterBuilder.less';
 
-const QuickFilterBuilder = ({ query, onQueryChange }) => {
+const QuickFilterBuilder = ({ query, onQueryChange, savedViews = [], onSaveView, onDeleteView }) => {
   // ── Local State for Sidebar ────────────────────────────
   const [localSelectedStatuses, setLocalSelectedStatuses] = useState([]);
   const [localAgeRange, setLocalAgeRange] = useState({ min: '', max: '' });
   const [localUserType, setLocalUserType] = useState('');
+
+  // Helper to determine if a saved view is "active" based on current query
+  const isSavedViewActive = (savedQueryJson) => {
+    try {
+      const savedQuery = JSON.parse(savedQueryJson);
+      // Simple stringify comparison for exact match
+      return JSON.stringify(query.rules) === JSON.stringify(savedQuery.rules) && 
+             query.combinator === savedQuery.combinator;
+    } catch (e) {
+      return false;
+    }
+  };
 
   // ── Sync with Global Query Prop ────────────────────────
   // When the query prop changes (e.g. from Advanced Filters), update local state
@@ -83,7 +96,31 @@ const QuickFilterBuilder = ({ query, onQueryChange }) => {
     updateGlobalQuery(localSelectedStatuses, localAgeRange, value);
   }, [localSelectedStatuses, localAgeRange, updateGlobalQuery]);
 
+  const handleApplySavedView = useCallback((savedQueryJson) => {
+    try {
+      if (isSavedViewActive(savedQueryJson)) {
+        // If it's already active, clicking it again should clear it
+        onQueryChange({ combinator: 'and', rules: [] });
+      } else {
+        // Otherwise, apply it
+        const savedQuery = JSON.parse(savedQueryJson);
+        onQueryChange(savedQuery);
+      }
+    } catch (e) {
+      console.error("Failed to parse saved query", e);
+    }
+  }, [onQueryChange, query]);
+
   const isStatusChecked = (status) => localSelectedStatuses.includes(status);
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter saved views based on search query
+  const filteredSavedViews = useMemo(() => {
+    return savedViews.filter(view => 
+      view.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [savedViews, searchQuery]);
 
   return (
     <aside className="quick-filter-sidebar">
@@ -94,6 +131,7 @@ const QuickFilterBuilder = ({ query, onQueryChange }) => {
           <LucideZap size={16} className="title-icon zap-icon" />
         </div>
         <div className="card-body">
+...existing UI...
           <div className="filter-field">
             <label className="field-label">User Status</label>
             <div className="checkbox-group">
@@ -164,45 +202,65 @@ const QuickFilterBuilder = ({ query, onQueryChange }) => {
       </div>
 
       {/* Saved Filters Card */}
-      <div className="sidebar-card">
+      <div className="sidebar-card saved-filters-section">
         <div className="card-header">
           <h2 className="card-title">Saved Filters</h2>
-          <button className="add-filter-btn">
+          <button className="add-filter-btn" onClick={onSaveView} title="Save Current View">
             <LucidePlusCircle size={16} />
           </button>
         </div>
-        <nav className="saved-filters-nav">
-          <button className="nav-item active">
-            <div className="nav-label-group">
-              <LucideFilter size={14} />
-              <span className="badge badge-active">Active Users</span>
-            </div>
-            <span className="applied-pill">Applied</span>
-          </button>
-          <button className="nav-item">
-            <div className="nav-label-group">
-              <LucideUsers size={14} />
-              <span>Marketing Leads</span>
-            </div>
-          </button>
-          <button className="nav-item">
-            <div className="nav-label-group">
-              <LucideClock size={14} />
-              <span>Recent Signups</span>
-            </div>
-          </button>
-          <button className="nav-item">
-            <div className="nav-label-group">
-              <LucideTrendingDown size={14} />
-              <span>Churn Risk (High)</span>
-            </div>
-          </button>
-          <button className="nav-item">
-            <div className="nav-label-group">
-              <LucideUserMinus size={14} />
-              <span className="badge badge-inactive">Inactive 30+ Days</span>
-            </div>
-          </button>
+        
+        {savedViews.length > 0 && (
+          <div className="saved-filters-search">
+            <input 
+              type="text" 
+              placeholder="Search saved filters..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="filter-input"
+            />
+          </div>
+        )}
+        
+        <nav className="saved-filters-nav custom-scrollbar">
+          {savedViews.length === 0 ? (
+            <div className="no-filters-msg">No saved views yet.</div>
+          ) : filteredSavedViews.length === 0 ? (
+            <div className="no-filters-msg">No filters match your search.</div>
+          ) : (
+            filteredSavedViews.map((view) => {
+              const isActive = isSavedViewActive(view.queryJson);
+              return (
+                <div key={view.id} className={`nav-item-wrapper ${isActive ? 'active' : ''}`}>
+                  <button 
+                    className="nav-item-btn"
+                    onClick={() => handleApplySavedView(view.queryJson)}
+                    title={view.name}
+                  >
+                    <div className="nav-label-group">
+                      <LucideFilter size={14} />
+                      <span className="truncate-text">{view.name}</span>
+                    </div>
+                  </button>
+                  <div className="nav-item-actions">
+                    {isActive && <span className="applied-pill">Applied</span>}
+                    <button 
+                      className="delete-view-btn" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Are you sure you want to delete "${view.name}"?`)) {
+                          onDeleteView && onDeleteView(view.id);
+                        }
+                      }}
+                      title="Delete saved filter"
+                    >
+                      <LucideTrash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </nav>
       </div>
     </aside>

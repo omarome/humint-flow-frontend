@@ -1,0 +1,48 @@
+.saved-view-modal {
+  .MuiDialog-paper {
+    background-image: none; // Remove MUI default gradient if any
+  }
+
+  .filters-review-list {
+    background: var(--background-muted);
+    
+    .MuiListItem-root {
+      transition: background 0.2s ease;
+      
+      &:hover {
+        background: rgba(124, 105, 239, 0.05);
+      }
+    }
+
+    .filter-field {
+      color: var(--primary-color);
+      font-weight: 600;
+      background: rgba(124, 105, 239, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .filter-op {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    .filter-val {
+      color: var(--text-color);
+      font-weight: 500;
+    }
+  }
+
+  // Support for dark mode
+  .dark-mode & {
+    .filters-review-list {
+      background: #1e293b;
+    }
+    
+    .MuiInputBase-input {
+      color: #fff;
+    }
+  }
+}

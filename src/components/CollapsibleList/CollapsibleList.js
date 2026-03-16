@@ -31,7 +31,8 @@ const CollapsibleList = ({
   variables, 
   isDataLoading: isLoading,
   onBulkDelete,
-  onBulkEmail
+  onBulkEmail,
+  onSaveView
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const hasLoadedRef = useRef(false);
@@ -110,7 +111,13 @@ const CollapsibleList = ({
           </button>
         </div>
         <div className="secondary-actions">
-           <button className="action-btn border-btn"><LucideSave size={16} /> Save View</button>
+           <button 
+             className="action-btn border-btn"
+             onClick={onSaveView}
+           >
+             <LucideSave size={16} /> 
+             Save View
+           </button>
            <button 
              className="action-btn border-btn"
              onClick={handleExport}
