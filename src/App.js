@@ -13,7 +13,6 @@ import Layout from './components/Layout/Layout';
 import AnalyticsCard from './components/Layout/AnalyticsCard';
 import QuickFilterBuilder from './components/Sidebar/QuickFilterBuilder';
 import DataSourceBanner from './components/DataSourceBanner/DataSourceBanner';
-import { fetchUsers, fetchVariables } from './services/userApi';
 import { mockUsers } from './data/mockData';
 import { mockVariables } from './data/mockVariables';
 import { AuthProvider, useAuth } from './context/AuthProvider';
@@ -21,6 +20,8 @@ import { ThemeControlProvider, useThemeControl } from './context/ThemeContext';
 import { Toaster, toast } from 'react-hot-toast';
 import EmailModal from './components/EmailModal/EmailModal';
 import ConfirmationModal from './components/ConfirmationModal/ConfirmationModal';
+import SavedViewModal from './components/SavedViewModal/SavedViewModal';
+import { fetchUsers, fetchVariables, saveView, fetchSavedViews, deleteSavedView } from './services/userApi';
 import './styles/App.less';
 
 /**
@@ -73,6 +74,8 @@ function AppContent() {
   const [emailRecipients, setEmailRecipients] = useState([]);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState([]);
+  const [isSaveViewModalOpen, setIsSaveViewModalOpen] = useState(false);
+  const [savedViews, setSavedViews] = useState([]);
 
   const handleBulkDeleteRequested = useCallback((ids) => {
     setItemsToDelete(ids);
@@ -123,15 +126,56 @@ function AppContent() {
     setIsEmailModalOpen(false);
   }, [emailRecipients, mode]);
 
+  const handleSaveView = useCallback(async (name, savedQuery) => {
+    try {
+      await saveView({
+        name,
+        queryJson: JSON.stringify(savedQuery)
+      });
+      toast.success(`View "${name}" saved successfully!`, {
+        icon: '💾',
+        style: {
+          background: mode === 'dark' ? '#0f172a' : '#fff',
+          color: mode === 'dark' ? '#fff' : '#1e293b',
+          border: mode === 'dark' ? '1px solid #334155' : '1px solid #e2e8f0'
+        }
+      });
+      // Refresh saved views after a successful save
+      const updatedViews = await fetchSavedViews();
+      setSavedViews(updatedViews);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save view');
+      throw error; // Let the modal handle it if needed
+    }
+  }, [mode]);
+
+  const handleDeleteSavedView = useCallback(async (id) => {
+    try {
+      await deleteSavedView(id);
+      setSavedViews(prev => prev.filter(view => view.id !== id));
+      toast.success('Saved view deleted.', {
+        icon: '🗑️',
+        style: {
+          background: mode === 'dark' ? '#0f172a' : '#fff',
+          color: mode === 'dark' ? '#fff' : '#1e293b',
+          border: mode === 'dark' ? '1px solid #334155' : '1px solid #e2e8f0'
+        }
+      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to delete saved view');
+    }
+  }, [mode]);
+
   useEffect(() => {
     if (!isAuthenticated || dataFetchedRef.current) return;
     dataFetchedRef.current = true;
 
     setIsDataLoading(true);
-    Promise.all([fetchUsers(), fetchVariables()])
-      .then(([usersData, variablesData]) => {
+    Promise.all([fetchUsers(), fetchVariables(), fetchSavedViews()])
+      .then(([usersData, variablesData, savedViewsData]) => {
         setUsers(usersData);
         setVariables(variablesData);
+        setSavedViews(savedViewsData);
         setIsLive(true);
       })
       .catch(() => {
@@ -252,6 +296,12 @@ function AppContent() {
         message={`Are you sure you want to delete ${itemsToDelete.length} ${itemsToDelete.length === 1 ? 'item' : 'items'}? This action cannot be undone.`}
         confirmText="Confirm Delete"
       />
+      <SavedViewModal 
+        isOpen={isSaveViewModalOpen}
+        onClose={() => setIsSaveViewModalOpen(false)}
+        query={query}
+        onSave={handleSaveView}
+      />
     </>
   );
 
@@ -262,6 +312,9 @@ function AppContent() {
         <QuickFilterBuilder
           query={query}
           onQueryChange={handleQueryChange}
+          savedViews={savedViews}
+          onSaveView={() => setIsSaveViewModalOpen(true)}
+          onDeleteView={handleDeleteSavedView}
         />
       }
       bannerContent={banner}
@@ -279,6 +332,7 @@ function AppContent() {
               onResetQuery={handleResetQuery}
               onBulkDelete={handleBulkDeleteRequested}
               onBulkEmail={handleBulkEmailRequested}
+              onSaveView={() => setIsSaveViewModalOpen(true)}
             />
           } />
           <Route path="/settings/account" element={<ProfileView />} />

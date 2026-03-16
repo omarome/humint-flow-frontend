@@ -68,7 +68,7 @@ const ResultsTable = ({
         >
           Results ({totalItems} {totalItems === 1 ? 'item' : 'items'})
         </h3>
-        <div className="bulk-actions">
+        <div className={`bulk-actions ${selectedIds.length > 0 ? 'active' : ''}`}>
           <span className="bulk-label">Bulk Actions:</span>
           <button 
             className="bulk-btn" 
