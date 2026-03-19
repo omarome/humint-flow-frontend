@@ -55,6 +55,7 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
           <div className="header-left">
             <IconButton
               className="sidebar-toggle"
+              data-testid="sidebar-toggle-btn"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               sx={{ mr: 1, color: 'var(--text-color)', display: isHub ? 'inline-flex' : 'none' }}
             >
@@ -63,7 +64,7 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
             <div className="logo-box" onClick={() => navigate('/')}>
               <LucideLayers size={24} />
             </div>
-            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>Smart Filter Hub</Typography>
+            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>QueryForge</Typography>
             {/* <div className="search-bar">
               <LucideSearch className="search-icon" size={18} />
               <input type="text" placeholder="Search across all records..." />
@@ -178,9 +179,16 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
         <div className={`content-layout-grid ${!isHub ? 'full-width' : ''}`}>
           {/* Sidebar - Only on Hub */}
           {isHub && (
-            <aside className={`sidebar animate-slide-up delay-100 ${sidebarOpen ? 'is-open' : ''}`}>
-              {sidebarContent}
-            </aside>
+            <>
+              <div 
+                className={`sidebar-overlay ${sidebarOpen ? 'is-open' : ''}`} 
+                onClick={() => setSidebarOpen(false)} 
+                data-testid="sidebar-overlay"
+              />
+              <aside className={`sidebar animate-slide-up delay-100 ${sidebarOpen ? 'is-open' : ''}`}>
+                {sidebarContent}
+              </aside>
+            </>
           )}
 
           {/* Page Content */}
