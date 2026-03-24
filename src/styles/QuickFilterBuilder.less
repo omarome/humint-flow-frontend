@@ -190,6 +190,37 @@
     }
   }
 
+  .sidebar-collapse-container {
+    .sidebar-collapse-btn {
+      width: 100%;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: var(--background-btn);
+      border: 1px dashed var(--border-color);
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background-color: #5b4bc4;
+        color: white;
+        border-color: #5b4bc4;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(93, 117, 232, 0.25);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
   .saved-filters-section {
     display: flex;
     flex-direction: column;

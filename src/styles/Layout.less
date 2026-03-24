@@ -200,6 +200,11 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  // Clip the off-screen sidebar on mobile so it doesn't bleed through
+  @media (max-width: 1023px) {
+    overflow-x: hidden;
+  }
 }
 
 .analytics-grid {
@@ -225,7 +230,12 @@
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
-    gap: 41px;
+    gap: 0; // default: no gap when sidebar is closed
+
+    // Only apply gap when the sidebar is actually open
+    &:has(.sidebar.is-open) {
+      gap: 41px;
+    }
   }
 
   &.full-width {
@@ -257,43 +267,58 @@
   }
 
   .sidebar {
-    display: none; // Hidden by default
     flex-shrink: 0;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
+
+    // Mobile: instant show/hide — no transitions
+    @media (max-width: 1023px) {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 64px;
+      bottom: 0;
+      width: 280px;
+      z-index: 1000;
+      background: var(--background-page);
+      padding: 16px;
+      border-right: 1px solid var(--border-color);
+      box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+
+    // Desktop: smooth width/opacity collapse
+    @media (min-width: 1024px) {
+      display: flex;
+      position: sticky;
+      top: 88px;
+      width: 0;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transition: width 0.35s ease-in-out, opacity 0.35s ease-in-out, visibility 0.35s ease-in-out;
+    }
 
     &.is-open {
-      display: flex;
-      opacity: 1; // Fix invisible sidebar bug caused by conflicting opacity classes
-
       @media (max-width: 1023px) {
-        position: fixed;
-        left: 0;
-        top: 64px;
-        bottom: 0;
-        width: 280px;
-        z-index: 1000;
-        background: var(--background-page);
-        padding: 16px;
-        border-right: 1px solid var(--border-color);
-        box-shadow: 10px 0 15px -3px rgba(0, 0, 0, 0.1);
-        animation: slideInLeft 0.3s ease-out;
-        overflow-y: auto;
+        display: flex;
       }
 
       @media (min-width: 1024px) {
+        visibility: visible;
+        opacity: 1;
         width: 320px;
-        position: sticky;
-        top: 88px; // 64px header + 24px padding
+        overflow: visible;
       }
     }
   }
 
   .page-content-area {
     flex: 1;
-    min-width: 0; // Prevent flex item from overflowing its container
+    min-width: 0;
     width: 100%;
-    transition: all 0.3s ease;
+    transition: all 0.35s ease-in-out;
   }
 }
 
