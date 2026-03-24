@@ -66,7 +66,7 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
             <div className="logo-box" onClick={() => navigate('/')}>
               <LucideLayers size={24} />
             </div>
-            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>QueryForge</Typography>
+            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>Dynamic User Queries</Typography>
             {/* <div className="search-bar">
               <LucideSearch className="search-icon" size={18} />
               <input type="text" placeholder="Search across all records..." />

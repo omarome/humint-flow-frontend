@@ -66,7 +66,7 @@ export default function LoginPage({ onSwitchToRegister }) {
           Welcome Back
         </Typography>
         <Typography variant="body2" className="login-subtitle">
-          Sign in to QueryForge
+          Sign in to Dynamic User Queries
         </Typography>
 
         {error && (
