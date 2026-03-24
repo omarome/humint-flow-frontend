@@ -11,6 +11,7 @@ const ResultsTable = ({
   currentPage = 1,
   totalItems = 0,
   itemsPerPage = 10,
+  onItemsPerPageChange,
   onPageChange,
   onBulkDelete,
   onBulkEmail
@@ -63,16 +64,11 @@ const ResultsTable = ({
   return (
     <div className="results-table insight-table" data-testid={testIdPrefix}>
       <div className="results-table__header section-header">
-        <h3
-          className="results-table__title section-title"
-          data-testid={`${testIdPrefix}-title`}
-        >
-          Results ({totalItems} {totalItems === 1 ? 'item' : 'items'})
-        </h3>
+
         <div className={`bulk-actions ${selectedIds.length > 0 ? 'active' : ''}`}>
           <span className="bulk-label">Bulk Actions:</span>
           <button 
-            className="bulk-btn" 
+            className="bulk-btn email" 
             disabled={selectedIds.length === 0}
             onClick={() => onBulkEmail && onBulkEmail(selectedIds)}
           >
@@ -137,20 +133,38 @@ const ResultsTable = ({
                       : cellValue;
 
                     // Specialized rendering for InsightHub look
-                    if (column.key === 'displayName' || column.key === 'name' || column.key === 'User Details') {
+                    if (column.key === 'fullName') {
+                       // Failsafe string construction in case the backend hasn't been recompiled yet
+                       const actualValue = cellValue || `${row.firstName || ''} ${row.lastName || ''}`.trim() || 'Unknown User';
+                       
                        displayValue = (
                          <div className="user-cell">
                            <img 
                              className="user-avatar" 
-                             src={`https://ui-avatars.com/api/?name=${cellValue}&background=random`} 
+                             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(actualValue)}&background=7c69ef&color=fff`} 
                              alt="Avatar" 
                            />
                            <div className="user-details">
-                             <div className="user-name">{cellValue}</div>
+                             <div className="user-name">{actualValue}</div>
                              <div className="user-subtext">{row.email || 'user@example.com'}</div>
                            </div>
                          </div>
                        );
+                    }
+
+                    if (column.key === 'isOnline') {
+                      const isOnline = Boolean(cellValue);
+                      displayValue = (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ 
+                            width: '8px', 
+                            height: '8px', 
+                            borderRadius: '50%', 
+                            backgroundColor: isOnline ? '#10b981' : '#ef4444' 
+                          }}></span>
+                          <span style={{ fontWeight: 500 }}>{isOnline ? 'Online' : 'Offline'}</span>
+                        </div>
+                      );
                     }
 
                     if (column.key === 'status') {
@@ -201,9 +215,26 @@ const ResultsTable = ({
         </table>
       </div>
       <div className="table-footer">
-        <span className="page-info">Page {currentPage} of {totalPages}</span>
-        <div className="pagination-btns">
-          <button 
+        <div className="footer-stats">
+          <span className="total-items">Total: {totalItems} items</span>
+          <span className="page-info">Page {currentPage} of {totalPages}</span>
+        </div>
+        <div className="pagination-controls">
+          <div className="rows-per-page">
+            <label htmlFor="rowsPerPage">Rows per page:</label>
+            <select 
+              id="rowsPerPage" 
+              value={itemsPerPage} 
+              onChange={(e) => onItemsPerPageChange && onItemsPerPageChange(Number(e.target.value))}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <div className="pagination-btns">
+            <button 
             className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -220,7 +251,8 @@ const ResultsTable = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 ResultsTable.propTypes = {
@@ -236,6 +268,7 @@ ResultsTable.propTypes = {
   currentPage: PropTypes.number,
   totalItems: PropTypes.number,
   itemsPerPage: PropTypes.number,
+  onItemsPerPageChange: PropTypes.func,
   onPageChange: PropTypes.func,
   onBulkDelete: PropTypes.func,
   onBulkEmail: PropTypes.func,

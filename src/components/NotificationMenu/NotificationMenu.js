@@ -12,6 +12,7 @@ import {
   ListItemText,
   Avatar,
   Badge,
+  Tooltip,
 } from '@mui/material';
 import { 
   LucideBell, 
@@ -205,7 +206,7 @@ const NotificationMenu = ({ anchorEl, onClose }) => {
           <>
             <Divider className="notification-divider" />
             <div className="notification-footer">
-              <Button fullWidth className="view-all-btn">
+              <Button className="view-all-btn">
                 View All Notifications
               </Button>
             </div>
@@ -215,8 +216,5 @@ const NotificationMenu = ({ anchorEl, onClose }) => {
     </Popover>
   );
 };
-
-// Add Tooltip import that was missed above
-import Tooltip from '@mui/material/Tooltip';
 
 export default NotificationMenu;

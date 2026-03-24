@@ -164,6 +164,11 @@
         border: 2px solid white;
         margin-left: -8px;
         background-color: #e5e7eb; /* Tailwind gray-200 */
+
+        body.dark-mode & {
+          border-color: var(--background);
+          background-color: var(--background-soft);
+        }
       }
 
       .avatar-more {
@@ -180,6 +185,12 @@
         color: #6b7280; /* Tailwind gray-500 */
         margin-left: -8px;
         z-index: 1;
+
+        body.dark-mode & {
+          border-color: var(--background);
+          background-color: var(--background-soft);
+          color: var(--text-color);
+        }
       }
     }
   }

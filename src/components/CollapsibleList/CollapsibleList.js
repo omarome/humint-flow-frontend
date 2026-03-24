@@ -21,8 +21,6 @@ import '../../styles/CollapsibleList.less';
  * - Falls back to mock data when the API is unreachable
  * - Shows a one-time banner indicating the data source
  */
-const ITEMS_PER_PAGE = 10;
-
 const CollapsibleList = ({ 
   query, 
   onQueryChange, 
@@ -35,6 +33,7 @@ const CollapsibleList = ({
   onSaveView
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const hasLoadedRef = useRef(false);
 
   // Track if initial load is done
@@ -66,23 +65,36 @@ const CollapsibleList = ({
     setCurrentPage(page);
   }, []);
 
+  // Handle items per page change
+  const handleItemsPerPageChange = useCallback((newCount) => {
+    setItemsPerPage(newCount);
+    setCurrentPage(1); // Reset to first page to avoid out of bounds
+  }, []);
+
   // Slice data for pagination
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredData, currentPage]);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage]);
 
   const tableColumns = useMemo(() => {
     if (users.length === 0) return [];
 
     const labelMap = new Map(variables.map((v) => [v.name, v.label]));
 
-    return Object.keys(users[0])
-      .filter((key) => key !== 'id')
-      .map((key) => ({
-        key,
-        label: labelMap.get(key) || key,
-      }));
+    const keys = Object.keys(users[0]).filter(key => 
+      !['id', 'email', 'nickname', 'firstName', 'lastName'].includes(key)
+    );
+
+    // Failsafe: Ensure fullName is always present even if the Docker backend hasn't been rebuilt yet
+    if (!keys.includes('fullName')) {
+      keys.unshift('fullName');
+    }
+
+    return keys.map((key) => ({
+      key,
+      label: key === 'fullName' ? 'Full Name' : (labelMap.get(key) || key),
+    }));
   }, [users, variables]);
 
   // Export to CSV handler
@@ -134,7 +146,8 @@ const CollapsibleList = ({
         <ResultsTable
           data={paginatedData}
           totalItems={filteredData.length}
-          itemsPerPage={ITEMS_PER_PAGE}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
           currentPage={currentPage}
           onPageChange={handlePageChange}
           onBulkDelete={onBulkDelete}
