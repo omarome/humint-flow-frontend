@@ -154,7 +154,7 @@
     text-align: left;
 
     .results-table__thead {
-      background-color: rgb(38, 47, 64);
+      background-color: #efecff;
       
       .results-table__th {
         padding: 16px;
@@ -162,13 +162,21 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #ffffff;
+        color: var(--text-color);
         border-bottom: 1px solid var(--border-color-light);
         white-space: nowrap;
 
         &.checkbox-cell {
           width: 48px;
           text-align: center;
+        }
+      }
+
+      .dark-mode & {
+        background-color: rgb(38, 47, 64);
+        
+        .results-table__th {
+          color: #ffffff;
         }
       }
     }
