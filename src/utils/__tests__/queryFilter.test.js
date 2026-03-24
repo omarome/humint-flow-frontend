@@ -151,15 +151,15 @@ describe('filterData', () => {
 
   describe('null / notNull operators', () => {
     const dataWithNulls = [
-      { id: 1, name: 'Alice', nickname: 'Ali' },
-      { id: 2, name: 'Bob', nickname: null },
-      { id: 3, name: 'Charlie', nickname: undefined },
+      { id: 1, name: 'Alice', userType: 'admin' },
+      { id: 2, name: 'Bob', userType: null },
+      { id: 3, name: 'Charlie', userType: undefined },
     ];
 
     it('filters with null operator', () => {
       const query = {
         combinator: 'and',
-        rules: [{ field: 'nickname', operator: 'null' }],
+        rules: [{ field: 'userType', operator: 'null' }],
       };
       expect(filterData(dataWithNulls, query)).toHaveLength(2);
     });
@@ -167,7 +167,7 @@ describe('filterData', () => {
     it('filters with notNull operator', () => {
       const query = {
         combinator: 'and',
-        rules: [{ field: 'nickname', operator: 'notNull' }],
+        rules: [{ field: 'userType', operator: 'notNull' }],
       };
       expect(filterData(dataWithNulls, query)).toHaveLength(1);
     });

@@ -71,7 +71,7 @@ export default function RegisterPage({ onSwitchToLogin }) {
           Create Account
         </Typography>
         <Typography variant="body2" className="register-subtitle">
-          Join QueryForge
+          Join Dynamic User Queries
         </Typography>
 
         {error && (

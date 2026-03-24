@@ -53,18 +53,20 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
       <header className="site-header animate-fade">
         <div className="header-container">
           <div className="header-left">
-            <IconButton
-              className="sidebar-toggle"
-              data-testid="sidebar-toggle-btn"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              sx={{ mr: 1, color: 'var(--text-color)', display: isHub ? 'inline-flex' : 'none' }}
-            >
-              {sidebarOpen ? <LucideX size={24} /> : <LucideMenu size={24} />}
-            </IconButton>
+            <Tooltip title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}>
+              <IconButton
+                className="sidebar-toggle"
+                data-testid="sidebar-toggle-btn"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                sx={{ mr: 1, color: 'var(--text-color)', display: isHub ? 'inline-flex' : 'none' }}
+              >
+                {sidebarOpen ? <LucideX size={24} /> : <LucideMenu size={24} />}
+              </IconButton>
+            </Tooltip>
             <div className="logo-box" onClick={() => navigate('/')}>
               <LucideLayers size={24} />
             </div>
-            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>QueryForge</Typography>
+            <Typography variant="h1" className="site-title" onClick={() => navigate('/')}>Dynamic User Queries</Typography>
             {/* <div className="search-bar">
               <LucideSearch className="search-icon" size={18} />
               <input type="text" placeholder="Search across all records..." />
@@ -186,7 +188,10 @@ const Layout = ({ children, sidebarContent, analyticsContent, bannerContent, mod
                 data-testid="sidebar-overlay"
               />
               <aside className={`sidebar animate-slide-up delay-100 ${sidebarOpen ? 'is-open' : ''}`}>
-                {sidebarContent}
+                {React.cloneElement(sidebarContent, { 
+                  onToggleSidebar: () => setSidebarOpen(!sidebarOpen), 
+                  isSidebarOpen: sidebarOpen 
+                })}
               </aside>
             </>
           )}

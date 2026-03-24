@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Trash2 } from 'lucide-react';
+import { Mail, Trash2, X as LucideX, Save as LucideSave, Download as LucideDownload, ArrowUp, ArrowDown, ArrowUpDown, Loader2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import '../../styles/ResultsTable.less';
 
@@ -7,13 +7,22 @@ const ResultsTable = ({
   data, 
   columns, 
   isLoading = false, 
+  isSortLoading = false,
   testIdPrefix = 'results-table',
   currentPage = 1,
   totalItems = 0,
   itemsPerPage = 10,
+  onItemsPerPageChange,
   onPageChange,
   onBulkDelete,
-  onBulkEmail
+  onBulkEmail,
+  onResetQuery,
+  query,
+  onSaveView,
+  onExport,
+  sortField,
+  sortDirection,
+  onSortChange
 }) => {
   const [selectedIds, setSelectedIds] = React.useState([]);
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
@@ -63,31 +72,56 @@ const ResultsTable = ({
   return (
     <div className="results-table insight-table" data-testid={testIdPrefix}>
       <div className="results-table__header section-header">
-        <h3
-          className="results-table__title section-title"
-          data-testid={`${testIdPrefix}-title`}
+        <button 
+          className="clear-filters-btn"
+          onClick={onResetQuery}
+          disabled={!query || query.rules.length === 0}
+          title="Clear all filters"
         >
-          Results ({totalItems} {totalItems === 1 ? 'item' : 'items'})
-        </h3>
-        <div className={`bulk-actions ${selectedIds.length > 0 ? 'active' : ''}`}>
-          <span className="bulk-label">Bulk Actions:</span>
+          <LucideX size={16} /> Clear Filters
+        </button>
+        <div className="header-actions-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="secondary-actions desktop-only-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button 
+              className="desktop-header-btn"
+              onClick={onSaveView}
+            >
+              <LucideSave size={14} /> Save View
+            </button>
+            <button 
+              className="desktop-header-btn"
+              onClick={onExport}
+              title="Export current view to CSV"
+            >
+              <LucideDownload size={14} /> Export
+            </button>
+          </div>
+          <div className={`bulk-actions ${selectedIds.length > 0 ? 'active' : ''}`}>
           <button 
-            className="bulk-btn" 
+            className="bulk-btn email" 
             disabled={selectedIds.length === 0}
             onClick={() => onBulkEmail && onBulkEmail(selectedIds)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            Email
+            <Mail size={14} /> Email
           </button>
           <button 
             className="bulk-btn delete" 
             disabled={selectedIds.length === 0}
             onClick={() => onBulkDelete && onBulkDelete(selectedIds)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
-            Delete
+            <Trash2 size={14} /> Delete
           </button>
+        </div>
         </div>
       </div>
       <div className="results-table__container custom-scrollbar">
+        {isSortLoading && (
+          <div className="results-table__sort-overlay">
+            <Loader2 className="sort-spinner" size={28} />
+          </div>
+        )}
         <table
           className="results-table__table"
           data-testid={`${testIdPrefix}-table`}
@@ -101,15 +135,38 @@ const ResultsTable = ({
                   checked={isAllSelected}
                 />
               </th>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className="results-table__th"
-                  data-testid={`${testIdPrefix}-header-${column.key}`}
-                >
-                  {column.label || column.key}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const isSorted = sortField === column.key;
+                const handleSort = () => {
+                  if (!onSortChange) return;
+                  if (!isSorted) {
+                    onSortChange(column.key, 'asc');
+                  } else if (sortDirection === 'asc') {
+                    onSortChange(column.key, 'desc');
+                  } else {
+                    onSortChange(null, 'asc');
+                  }
+                };
+                return (
+                  <th
+                    key={column.key}
+                    className={`results-table__th sortable ${isSorted ? 'sorted' : ''}`}
+                    data-testid={`${testIdPrefix}-header-${column.key}`}
+                    onClick={handleSort}
+                    role="columnheader"
+                    aria-sort={isSorted ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  >
+                    <span className="th-content">
+                      {column.label || column.key}
+                      <span className="sort-indicator">
+                        {isSorted && sortDirection === 'asc' && <ArrowUp size={14} />}
+                        {isSorted && sortDirection === 'desc' && <ArrowDown size={14} />}
+                        {!isSorted && <ArrowUpDown size={14} />}
+                      </span>
+                    </span>
+                  </th>
+                );
+              })}
               <th className="results-table__th actions-cell">Actions</th>
             </tr>
           </thead>
@@ -137,20 +194,38 @@ const ResultsTable = ({
                       : cellValue;
 
                     // Specialized rendering for InsightHub look
-                    if (column.key === 'displayName' || column.key === 'name' || column.key === 'User Details') {
+                    if (column.key === 'fullName') {
+                       // Failsafe string construction in case the backend hasn't been recompiled yet
+                       const actualValue = cellValue || `${row.firstName || ''} ${row.lastName || ''}`.trim() || 'Unknown User';
+                       
                        displayValue = (
                          <div className="user-cell">
                            <img 
                              className="user-avatar" 
-                             src={`https://ui-avatars.com/api/?name=${cellValue}&background=random`} 
+                             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(actualValue)}&background=7c69ef&color=fff`} 
                              alt="Avatar" 
                            />
                            <div className="user-details">
-                             <div className="user-name">{cellValue}</div>
+                             <div className="user-name">{actualValue}</div>
                              <div className="user-subtext">{row.email || 'user@example.com'}</div>
                            </div>
                          </div>
                        );
+                    }
+
+                    if (column.key === 'isOnline') {
+                      const isOnline = Boolean(cellValue);
+                      displayValue = (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ 
+                            width: '8px', 
+                            height: '8px', 
+                            borderRadius: '50%', 
+                            backgroundColor: isOnline ? '#10b981' : '#ef4444' 
+                          }}></span>
+                          <span style={{ fontWeight: 500 }}>{isOnline ? 'Online' : 'Offline'}</span>
+                        </div>
+                      );
                     }
 
                     if (column.key === 'status') {
@@ -201,9 +276,26 @@ const ResultsTable = ({
         </table>
       </div>
       <div className="table-footer">
-        <span className="page-info">Page {currentPage} of {totalPages}</span>
-        <div className="pagination-btns">
-          <button 
+        <div className="footer-stats">
+          <span className="total-items">Total: {totalItems} items</span>
+          <span className="page-info">Page {currentPage} of {totalPages}</span>
+        </div>
+        <div className="pagination-controls">
+          <div className="rows-per-page">
+            <label htmlFor="rowsPerPage">Rows per page:</label>
+            <select 
+              id="rowsPerPage" 
+              value={itemsPerPage} 
+              onChange={(e) => onItemsPerPageChange && onItemsPerPageChange(Number(e.target.value))}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+          <div className="pagination-btns">
+            <button 
             className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -220,7 +312,8 @@ const ResultsTable = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 ResultsTable.propTypes = {
@@ -236,9 +329,18 @@ ResultsTable.propTypes = {
   currentPage: PropTypes.number,
   totalItems: PropTypes.number,
   itemsPerPage: PropTypes.number,
+  onItemsPerPageChange: PropTypes.func,
   onPageChange: PropTypes.func,
   onBulkDelete: PropTypes.func,
   onBulkEmail: PropTypes.func,
+  onResetQuery: PropTypes.func,
+  query: PropTypes.object,
+  onSaveView: PropTypes.func,
+  onExport: PropTypes.func,
+  sortField: PropTypes.string,
+  sortDirection: PropTypes.string,
+  onSortChange: PropTypes.func,
+  isSortLoading: PropTypes.bool,
 };
 
 export default ResultsTable;

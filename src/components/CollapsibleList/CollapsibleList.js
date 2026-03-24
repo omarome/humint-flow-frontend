@@ -2,7 +2,6 @@ import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import 'react-querybuilder/dist/query-builder.css';
 import { LucideSave, LucideDownload, LucideX } from 'lucide-react';
 
-import QueryBuilderController from '../QueryBuilderController/QueryBuilderController';
 import ResultsTable from '../ResultsTable/ResultsTable';
 import { filterData } from '../../utils/queryFilter';
 import { fetchUsers, fetchVariables } from '../../services/userApi';
@@ -21,8 +20,6 @@ import '../../styles/CollapsibleList.less';
  * - Falls back to mock data when the API is unreachable
  * - Shows a one-time banner indicating the data source
  */
-const ITEMS_PER_PAGE = 10;
-
 const CollapsibleList = ({ 
   query, 
   onQueryChange, 
@@ -30,11 +27,15 @@ const CollapsibleList = ({
   users, 
   variables, 
   isDataLoading: isLoading,
+  isSortLoading,
   onBulkDelete,
   onBulkEmail,
-  onSaveView
+  onSaveView,
+  sortConfig,
+  onSortChange
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const hasLoadedRef = useRef(false);
 
   // Track if initial load is done
@@ -66,23 +67,40 @@ const CollapsibleList = ({
     setCurrentPage(page);
   }, []);
 
+  // Handle items per page change
+  const handleItemsPerPageChange = useCallback((newCount) => {
+    setItemsPerPage(newCount);
+    setCurrentPage(1); // Reset to first page to avoid out of bounds
+  }, []);
+
   // Slice data for pagination
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredData, currentPage]);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage]);
 
   const tableColumns = useMemo(() => {
     if (users.length === 0) return [];
 
     const labelMap = new Map(variables.map((v) => [v.name, v.label]));
 
-    return Object.keys(users[0])
-      .filter((key) => key !== 'id')
-      .map((key) => ({
-        key,
-        label: labelMap.get(key) || key,
-      }));
+    const keys = Object.keys(users[0]).filter(key => 
+      !['id', 'email', 'nickname', 'firstName', 'lastName'].includes(key)
+    );
+
+    // Ensure fullName is always the first column
+    const fullNameIndex = keys.indexOf('fullName');
+    if (fullNameIndex > 0) {
+      keys.splice(fullNameIndex, 1);
+      keys.unshift('fullName');
+    } else if (fullNameIndex === -1) {
+      keys.unshift('fullName');
+    }
+
+    return keys.map((key) => ({
+      key,
+      label: key === 'fullName' ? 'Full Name' : (labelMap.get(key) || key),
+    }));
   }, [users, variables]);
 
   // Export to CSV handler
@@ -93,25 +111,8 @@ const CollapsibleList = ({
 
   return (
     <div className="collapsible-list insight-hub-wrapper" data-testid="collapsible-list">
-      
-      <div className="main-actions-row animate-slide-up delay-300">
-        <div className="primary-actions-group">
-          <QueryBuilderController
-            fields={fields}
-            query={query}
-            label="Advanced filters"
-            onQueryChange={handleQueryChange}
-          />
-          <button 
-            className="action-btn clear-filters-btn"
-            onClick={onResetQuery}
-            title="Clear all filters"
-          >
-            <LucideX size={16} /> 
-            Clear Filters
-          </button>
-        </div>
-        <div className="secondary-actions">
+      <div className="main-actions-row mobile-only-actions animate-slide-up delay-300">
+        <div className="secondary-actions" style={{ marginLeft: 'auto', marginBottom: '16px' }}>
            <button 
              className="action-btn border-btn"
              onClick={onSaveView}
@@ -129,18 +130,26 @@ const CollapsibleList = ({
            </button>
         </div>
       </div>
-
       <div className="results-container animate-fade delay-400">
         <ResultsTable
           data={paginatedData}
           totalItems={filteredData.length}
-          itemsPerPage={ITEMS_PER_PAGE}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
           currentPage={currentPage}
           onPageChange={handlePageChange}
           onBulkDelete={onBulkDelete}
           onBulkEmail={onBulkEmail}
+          onResetQuery={onResetQuery}
+          query={query}
           columns={tableColumns}
           isLoading={isLoading}
+          isSortLoading={isSortLoading}
+          onSaveView={onSaveView}
+          onExport={handleExport}
+          sortField={sortConfig?.field}
+          sortDirection={sortConfig?.direction}
+          onSortChange={onSortChange}
         />
       </div>
     </div>

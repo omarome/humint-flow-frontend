@@ -163,7 +163,7 @@
       padding: 0;
 
       .notification-item {
-        padding: 16px;
+        padding: 16px 48px 16px 16px;
         transition: background-color 0.2s;
         cursor: pointer;
         position: relative;
@@ -247,6 +247,7 @@
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -263,7 +264,9 @@
   }
 
   .notification-footer {
-    padding: 8px;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: flex-end;
     
     .view-all-btn {
       text-transform: none;
