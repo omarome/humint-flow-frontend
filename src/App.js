@@ -51,17 +51,12 @@ function AppContent() {
   const location = useLocation();
 
   // ── Handle OAuth Success Redirect ──────────────────────
+  // Tokens are set as HttpOnly cookies by the backend — no URL params to read.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
-
-    if (accessToken && refreshToken && window.location.pathname.includes('/login-success')) {
-      handleOAuthSuccess(accessToken, refreshToken);
-      // Clean up URL to keep it pretty
-      window.history.replaceState({}, document.title, "/");
+    if (window.location.pathname.includes('/login-success')) {
+      window.history.replaceState({}, document.title, '/');
     }
-  }, [handleOAuthSuccess]);
+  }, []);
 
   // ── Handle Global Data Connection State ─────────────────
   const [isLive, setIsLive] = useState(null);
