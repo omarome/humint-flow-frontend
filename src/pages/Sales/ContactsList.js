@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { LucidePlus } from 'lucide-react';
 import ResultsTable from '../../components/ResultsTable/ResultsTable';
 import InlineFilterBar from '../../components/InlineFilterBar/InlineFilterBar';
 import { deleteContact } from '../../services/contactApi';
@@ -123,14 +124,11 @@ const ContactsList = ({ query, onQueryChange, onResetQuery, variables, users, on
   ];
 
   return (
-    <div className="sales-workspace-page" style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="sales-workspace-page">
+      <div className="sales-page-header">
         <h2 className="page-title-gradient">Contacts</h2>
-        <button
-          className="primary-btn"
-          onClick={() => setIsCreateModalOpen(true)}
-          style={{ padding: '8px 16px', borderRadius: '8px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 500 }}
-        >
+        <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+          <LucidePlus size={15} />
           New Contact
         </button>
       </div>
@@ -143,7 +141,7 @@ const ContactsList = ({ query, onQueryChange, onResetQuery, variables, users, on
         quickFilters={['status', 'lifecycleStage', 'jobTitle', 'pipelineStage']}
       />
 
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div className="sales-table-wrapper">
         <ResultsTable
           data={data}
           columns={columns}

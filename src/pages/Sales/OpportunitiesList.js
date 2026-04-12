@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { LucidePlus } from 'lucide-react';
 import ResultsTable from '../../components/ResultsTable/ResultsTable';
 import InlineFilterBar from '../../components/InlineFilterBar/InlineFilterBar';
 import { deleteOpportunity } from '../../services/opportunityApi';
@@ -141,14 +142,11 @@ const OpportunitiesList = ({ query, onQueryChange, onResetQuery, variables, user
   ];
 
   return (
-    <div className="sales-workspace-page" style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="sales-workspace-page">
+      <div className="sales-page-header">
         <h2 className="page-title-gradient">Opportunities</h2>
-        <button
-          className="primary-btn"
-          onClick={() => setIsCreateModalOpen(true)}
-          style={{ padding: '8px 16px', borderRadius: '8px', background: 'var(--primary-color)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 500 }}
-        >
+        <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+          <LucidePlus size={15} />
           New Opportunity
         </button>
       </div>
@@ -161,7 +159,7 @@ const OpportunitiesList = ({ query, onQueryChange, onResetQuery, variables, user
         quickFilters={['stage', 'probability']}
       />
 
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div className="sales-table-wrapper">
         <ResultsTable
           data={data}
           columns={columns}
