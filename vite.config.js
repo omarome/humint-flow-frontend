@@ -34,7 +34,13 @@ export default defineConfig({
           ],
 
           // Firebase SDK — large and stable
-          'vendor-firebase': ['firebase'],
+          'vendor-firebase': [
+            'firebase/app',
+            'firebase/auth',
+            'firebase/firestore',
+            'firebase/analytics',
+            'firebase/messaging',
+          ],
 
           // Charting — heavy, only used on dashboard
           'vendor-charts': ['recharts'],

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Card, 
-  CardContent, 
-  Grid, 
-  IconButton, 
-  Switch, 
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  IconButton,
+  Switch,
   Tooltip,
   Paper,
   CircularProgress
@@ -80,7 +79,7 @@ const AutomationList = ({ onNewRule }) => {
 
   return (
     <Box className={`automations-container ${mode}`} sx={{ p: { xs: 2, md: 4 } }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexWrap: { xs: 'wrap', sm: 'nowrap' }, gap: { xs: 1.5, sm: 0 }, mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ 
             width: 48, 
@@ -99,20 +98,10 @@ const AutomationList = ({ onNewRule }) => {
             <Typography variant="body2" color="text.secondary">Put your CRM on autopilot with no-code workflows.</Typography>
           </Box>
         </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<LucidePlus size={18} />}
-          onClick={onNewRule}
-          sx={{ 
-            bgcolor: 'var(--primary-color)',
-            '&:hover': { bgcolor: 'var(--primary-hover)' },
-            textTransform: 'none',
-            borderRadius: '10px',
-            px: 3
-          }}
-        >
+        <button className="btn-primary" onClick={onNewRule}>
+          <LucidePlus size={15} />
           New Rule
-        </Button>
+        </button>
       </Box>
 
       {rules.length === 0 ? (
@@ -128,9 +117,10 @@ const AutomationList = ({ onNewRule }) => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 400, mx: 'auto' }}>
             Create your first rule to automate repetitive tasks and save time.
           </Typography>
-          <Button variant="outlined" onClick={onNewRule} sx={{ borderRadius: '10px', textTransform: 'none' }}>
+          <button className="btn-primary" onClick={onNewRule}>
+            <LucidePlus size={15} />
             Create First Automation
-          </Button>
+          </button>
         </Paper>
       ) : (
         <Grid container spacing={3}>
