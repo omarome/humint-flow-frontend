@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth, googleProvider } from '../config/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, signOut, onIdTokenChanged, getIdToken, getIdTokenResult, updateProfile as firebaseUpdateProfile, deleteUser } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, signOut, onIdTokenChanged, getIdToken, getIdTokenResult, updateProfile as firebaseUpdateProfile, deleteUser, sendPasswordResetEmail } from 'firebase/auth';
 import { deleteAccountApi } from '../services/authApi';
 import { getMyWorkspaces, switchActiveWorkspace } from '../services/workspaceApi';
 
@@ -185,6 +185,10 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   }, []);
 
+  const sendPasswordReset = useCallback(async (email) => {
+    await sendPasswordResetEmail(auth, email);
+  }, []);
+
   const performLogout = useCallback(async () => {
     await signOut(auth);
     _accessToken = null;
@@ -287,6 +291,7 @@ export function AuthProvider({ children }) {
     login,
     loginWithGoogle,
     register,
+    sendPasswordReset,
     logout: performLogout,
     updateProfile,
     deleteAccount,

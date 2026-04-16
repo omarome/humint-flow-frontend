@@ -33,3 +33,14 @@ export async function reactivateUser(id) {
     method: 'PUT',
   });
 }
+
+/**
+ * Permanently delete a pending (never-activated) invite.
+ * DELETE /api/admin/users/{id}
+ * @param {number} id
+ */
+export async function deleteInvite(id) {
+  return apiJson(`/admin/users/${id}`, {
+    method: 'DELETE',
+  });
+}

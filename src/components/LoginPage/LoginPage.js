@@ -31,12 +31,16 @@ const FEATURES = [
  * LoginPage – email/password login with optional social sign-in.
  */
 export default function LoginPage({ onSwitchToRegister }) {
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, sendPasswordReset } = useAuth();
   const { mode, toggleTheme } = useThemeControl();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetView, setResetView] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,6 +67,20 @@ export default function LoginPage({ onSwitchToRegister }) {
     }
   };
 
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    try {
+      await sendPasswordReset(resetEmail);
+      setResetSent(true);
+    } catch (err) {
+      setError(err.message || 'Failed to send reset email');
+      setResetView(false);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <div className="login-page">
       <Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
@@ -85,77 +103,131 @@ export default function LoginPage({ onSwitchToRegister }) {
         </div>
 
         <Paper className="login-card" elevation={0}>
-          <h2 className="login-title">Welcome back</h2>
-          <p className="login-subtitle">Sign in to continue</p>
+          {resetView ? (
+            <>
+              <h2 className="login-title">{resetSent ? 'Check your inbox' : 'Reset password'}</h2>
+              <p className="login-subtitle">
+                {resetSent
+                  ? `A password reset link was sent to ${resetEmail}.`
+                  : 'Enter your email and we\'ll send you a reset link.'}
+              </p>
 
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-              {error}
-            </Alert>
+              {!resetSent && (
+                <form onSubmit={handlePasswordReset} className="login-form">
+                  <TextField
+                    label="Email Address"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    fullWidth
+                    required
+                    autoFocus
+                    variant="outlined"
+                    className="login-field"
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    disabled={resetLoading}
+                    className="login-button"
+                  >
+                    {resetLoading ? <CircularProgress size={24} color="inherit" /> : 'Send Reset Link'}
+                  </Button>
+                </form>
+              )}
+
+              <p className="login-footer" style={{ marginTop: 16 }}>
+                <Link component="button" variant="body2" onClick={() => { setResetView(false); setResetSent(false); setError(''); }}>
+                  Back to sign in
+                </Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="login-title">Welcome back</h2>
+              <p className="login-subtitle">Sign in to continue</p>
+
+              {error && (
+                <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="login-form">
+                <TextField
+                  id="login-email"
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  fullWidth
+                  required
+                  autoFocus
+                  variant="outlined"
+                  className="login-field"
+                />
+                <TextField
+                  id="login-password"
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  fullWidth
+                  required
+                  variant="outlined"
+                  className="login-field"
+                />
+                <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 4 }}>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => { setResetEmail(email); setResetView(true); setError(''); }}
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <Button
+                  id="login-submit"
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  disabled={loading}
+                  className="login-button"
+                >
+                  {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+                </Button>
+              </form>
+
+              <Divider className="login-divider">or</Divider>
+
+              <Button
+                id="login-google"
+                variant="outlined"
+                fullWidth
+                size="large"
+                startIcon={<GoogleIcon />}
+                onClick={handleGoogleLogin}
+                className="login-google-button"
+              >
+                Sign in with Google
+              </Button>
+
+              <p className="login-footer">
+                Don't have an account?{' '}
+                <Link
+                  component="button"
+                  variant="body2"
+                  onClick={onSwitchToRegister}
+                  id="switch-to-register"
+                >
+                  Create one
+                </Link>
+              </p>
+            </>
           )}
-
-          <form onSubmit={handleSubmit} className="login-form">
-            <TextField
-              id="login-email"
-              label="Email Address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              fullWidth
-              required
-              autoFocus
-              variant="outlined"
-              className="login-field"
-            />
-            <TextField
-              id="login-password"
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-              required
-              variant="outlined"
-              className="login-field"
-            />
-            <Button
-              id="login-submit"
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={loading}
-              className="login-button"
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
-            </Button>
-          </form>
-
-          <Divider className="login-divider">or</Divider>
-
-          <Button
-            id="login-google"
-            variant="outlined"
-            fullWidth
-            size="large"
-            startIcon={<GoogleIcon />}
-            onClick={handleGoogleLogin}
-            className="login-google-button"
-          >
-            Sign in with Google
-          </Button>
-
-          <p className="login-footer">
-            Don't have an account?{' '}
-            <Link
-              component="button"
-              variant="body2"
-              onClick={onSwitchToRegister}
-              id="switch-to-register"
-            >
-              Create one
-            </Link>
-          </p>
         </Paper>
 
         {/* Feature highlights below the card */}

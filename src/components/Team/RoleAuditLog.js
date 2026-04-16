@@ -7,23 +7,25 @@ import { useThemeControl } from '../../context/ThemeContext';
 import '../../pages/Team/TeamPage.less';
 
 export default function RoleAuditLog({ onClose }) {
-  const { currentWorkspace } = useAuth();
+  const { activeWorkspaceId, workspaces } = useAuth();
   const { mode } = useThemeControl();
   const isDark = mode === 'dark';
-  
+
+  // activeWorkspaceId may be null on first login before claims are set;
+  // fall back to first workspace from the list
+  const workspaceId = activeWorkspaceId ?? workspaces?.[0]?.id;
+
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentWorkspace) return;
+    if (!workspaceId) return;
     setLoading(true);
-    apiJson(`/workspaces/${currentWorkspace.id}/audit/roles`)
-      .then(data => {
-        setLogs(data);
-      })
+    apiJson(`/workspaces/${workspaceId}/audit/roles`)
+      .then(data => setLogs(data))
       .catch(err => toast.error(err.message || 'Failed to load audit logs'))
       .finally(() => setLoading(false));
-  }, [currentWorkspace]);
+  }, [workspaceId]);
 
   const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' };
   const modal   = { background: isDark ? '#1e293b' : '#fff', borderRadius: 16, padding: '32px 28px', width: 640, maxWidth: '90vw', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.4)', position: 'relative' };
@@ -45,7 +47,7 @@ export default function RoleAuditLog({ onClose }) {
           <LucideShieldAlert size={20} color="#7c3aed" /> Role Audit Logs
         </h2>
         <p style={{ margin: '0 0 20px', fontSize: '0.85rem', color: subCol }}>
-          A chronological history of all role assignments in {currentWorkspace?.name || 'this workspace'}.
+          A chronological history of all role assignments in this workspace.
         </p>
 
         {loading ? (

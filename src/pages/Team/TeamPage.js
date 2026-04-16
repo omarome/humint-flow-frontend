@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchTeamMembers, fetchAllTeamMembers, updateTeamMember, updateTeamMemberRole } from '../../services/teamApi';
-import { inviteUser, deactivateUser, reactivateUser } from '../../services/adminApi';
+import { inviteUser, deactivateUser, reactivateUser, deleteInvite } from '../../services/adminApi';
 import { toast } from 'react-hot-toast';
 import { useThemeControl } from '../../context/ThemeContext';
 import { useRole } from '../../hooks/useRole';
@@ -235,7 +235,7 @@ const mockActivityData = [
 
 // ─── Profile Drawer ────────────────────────────────────────────────────────────
 
-function ProfileDrawer({ member, onClose, onUpdate, onDeactivate }) {
+function ProfileDrawer({ member, onClose, onUpdate, onDeactivate, onDeleted }) {
   const [editing,      setEditing]      = useState(false);
   const [saving,       setSaving]       = useState(false);
   const [roleChanging, setRoleChanging] = useState(false);
@@ -310,6 +310,21 @@ function ProfileDrawer({ member, onClose, onUpdate, onDeactivate }) {
     }
   };
 
+  const handleDeleteInvite = async () => {
+    if (!window.confirm(`Permanently delete ${member.displayName}'s account? Their data (deals, activities, comments) will be preserved but unassigned. This cannot be undone.`)) return;
+    setActioning(true);
+    try {
+      await deleteInvite(member.id);
+      toast.success(`Invite for ${member.displayName} removed.`);
+      onDeleted(member.id);
+      onClose();
+    } catch (err) {
+      toast.error(err.message || 'Delete failed');
+    } finally {
+      setActioning(false);
+    }
+  };
+
   const color = ROLE_COLORS[member.role] || ROLE_COLORS.USER;
 
   return (
@@ -376,6 +391,23 @@ function ProfileDrawer({ member, onClose, onUpdate, onDeactivate }) {
                   </select>
                   {roleChanging && <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Saving…</span>}
                 </label>
+              )}
+
+              {/* Remove account — only available when the account is inactive */}
+              {canManageUsers && !member.isActive && (
+                <button
+                  onClick={handleDeleteInvite}
+                  disabled={actioning}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '7px 14px', borderRadius: 8,
+                    border: '1px solid #fecaca', background: 'rgba(239,68,68,0.08)',
+                    color: '#ef4444', cursor: actioning ? 'not-allowed' : 'pointer',
+                    fontSize: '0.82rem', fontWeight: 600,
+                  }}
+                >
+                  🗑 Delete Account
+                </button>
               )}
 
               {/* Deactivate / Reactivate */}
@@ -563,6 +595,10 @@ export default function TeamPage() {
     setMembers(prev => [...prev, newMember]);
   }, []);
 
+  const handleDeleted = useCallback(id => {
+    setMembers(prev => prev.filter(m => m.id !== id));
+  }, []);
+
   const filtered = members.filter(m => {
     const matchRole   = roleFilter === 'ALL' || m.role === roleFilter;
     const matchSearch = !search || [m.displayName, m.email, m.jobTitle, m.department]
@@ -738,6 +774,7 @@ export default function TeamPage() {
           onClose={() => setSelected(null)}
           onUpdate={handleUpdate}
           onDeactivate={handleDeactivate}
+          onDeleted={handleDeleted}
         />
       )}
 
