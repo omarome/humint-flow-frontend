@@ -31,7 +31,7 @@ const FEATURES = [
  * LoginPage – email/password login with optional social sign-in.
  */
 export default function LoginPage({ onSwitchToRegister }) {
-  const { login, loginWithGoogle, sendPasswordReset } = useAuth();
+  const { login, loginWithGoogle, continueAsDemo, sendPasswordReset } = useAuth();
   const { mode, toggleTheme } = useThemeControl();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -62,6 +62,18 @@ export default function LoginPage({ onSwitchToRegister }) {
       await loginWithGoogle();
     } catch (err) {
       setError(err.message || 'Google Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await continueAsDemo();
+    } catch (err) {
+      setError(err.message || 'Demo login failed');
     } finally {
       setLoading(false);
     }
@@ -214,6 +226,21 @@ export default function LoginPage({ onSwitchToRegister }) {
               >
                 Sign in with Google
               </Button>
+
+              <Button
+                id="login-demo"
+                variant="text"
+                fullWidth
+                size="large"
+                disabled={loading}
+                onClick={handleDemoLogin}
+                className="login-demo-button"
+              >
+                Continue as Demo
+              </Button>
+              <p className="login-demo-caption">
+                No sign-in required — explore the full app, a few admin-only actions are disabled
+              </p>
 
               <p className="login-footer">
                 Don't have an account?{' '}

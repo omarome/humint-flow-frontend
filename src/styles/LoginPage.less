@@ -277,6 +277,40 @@
   }
 }
 
+// Deliberately quieter than "Sign In" / "Sign in with Google" — reads as the
+// lower-commitment third option, not a peer of the two real sign-in methods.
+.login-demo-button {
+  margin-top: 0.25rem !important;
+  text-transform: none !important;
+  font-weight: 500 !important;
+  color: @text-muted !important;
+
+  .dark-mode & {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+    color: @primary-color !important;
+
+    .dark-mode & {
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: @primary-color !important;
+    }
+  }
+}
+
+.login-demo-caption {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: @text-muted;
+  text-align: center;
+
+  .dark-mode & {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
 .login-footer {
   margin-top: 1.5rem;
   margin-bottom: 0;

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { auth, googleProvider } from '../config/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, signOut, onIdTokenChanged, getIdToken, getIdTokenResult, updateProfile as firebaseUpdateProfile, deleteUser, sendPasswordResetEmail } from 'firebase/auth';
-import { deleteAccountApi } from '../services/authApi';
+import { signInWithEmailAndPassword, signInWithPopup, signInWithCustomToken, createUserWithEmailAndPassword, signOut, onIdTokenChanged, getIdToken, getIdTokenResult, updateProfile as firebaseUpdateProfile, deleteUser, sendPasswordResetEmail } from 'firebase/auth';
+import { deleteAccountApi, demoLoginApi } from '../services/authApi';
 import { getMyWorkspaces, switchActiveWorkspace } from '../services/workspaceApi';
 
 const AuthContext = createContext(null);
@@ -192,6 +192,18 @@ export function AuthProvider({ children }) {
     return userCredential.user;
   }, []);
 
+  /**
+   * One-click, credential-free login as the shared demo account. Mints a
+   * Firebase custom token server-side, then signs in with it — flows through
+   * the same onIdTokenChanged listener as every other sign-in method, so no
+   * extra state plumbing is needed here.
+   */
+  const continueAsDemo = useCallback(async () => {
+    const { customToken } = await demoLoginApi();
+    const userCredential = await signInWithCustomToken(auth, customToken);
+    return userCredential.user;
+  }, []);
+
   const sendPasswordReset = useCallback(async (email) => {
     await sendPasswordResetEmail(auth, email);
   }, []);
@@ -312,6 +324,7 @@ export function AuthProvider({ children }) {
     // Auth actions
     login,
     loginWithGoogle,
+    continueAsDemo,
     register,
     sendPasswordReset,
     logout: performLogout,

@@ -20,6 +20,19 @@ export const loginApi = async (email, password) => {
 };
 
 /**
+ * POST /api/auth/demo — mints a short-lived Firebase custom token for the
+ * shared demo account. No credentials are exchanged on either side.
+ */
+export const demoLoginApi = async () => {
+  const response = await fetch(`${API_BASE}/auth/demo`, { method: 'POST' });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || `Demo login failed: ${response.status}`);
+  }
+  return response.json(); // { customToken }
+};
+
+/**
  * POST /api/auth/register
  */
 export const registerApi = async (email, password, displayName) => {
